@@ -1,10 +1,10 @@
 <script lang="ts">
+import type { SearchResult } from "@/global";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
 import { url } from "@utils/url-utils.ts";
 import { onMount } from "svelte";
-import type { SearchResult } from "@/global";
 
 let keywordDesktop = "";
 let keywordMobile = "";
@@ -112,16 +112,15 @@ onMount(() => {
 			console.warn(
 				"Pagefind load error event received. Search functionality will be limited.",
 			);
-			initializeSearch(); // Initialize with pagefindLoaded as false
+			initializeSearch();
 		});
 
-		// Fallback in case events are not caught or pagefind is already loaded by the time this script runs
 		setTimeout(() => {
 			if (!initialized) {
 				console.log("Fallback: Initializing search after timeout.");
 				initializeSearch();
 			}
-		}, 2000); // Adjust timeout as needed
+		}, 2000);
 	}
 });
 
@@ -187,7 +186,7 @@ top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2">
     {/each}
 </div>
 
-<style>
+<style lang="scss">
   input:focus {
     outline: 0;
   }

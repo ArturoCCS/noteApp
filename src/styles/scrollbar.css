@@ -5,20 +5,20 @@
     &.os-scrollbar-horizontal {
         @apply py-1 px-2 h-4;
         .os-scrollbar-track .os-scrollbar-handle {
-            @apply rounded-full h-2.5;
+            @apply rounded-full h-3;
         }
         &:hover .os-scrollbar-track .os-scrollbar-handle {
-            @apply h-3;
+            @apply h-3.5;
         }
     }
 
     &.os-scrollbar-vertical {
         @apply px-1 py-1 w-4;
         .os-scrollbar-track .os-scrollbar-handle {
-            @apply rounded-full w-2.5;
+            @apply rounded-full w-3;
         }
         &:hover .os-scrollbar-track .os-scrollbar-handle {
-            @apply w-3;
+            @apply w-3.5;
         }
     }
 }

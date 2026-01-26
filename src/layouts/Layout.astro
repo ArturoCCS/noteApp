@@ -145,10 +145,6 @@ const bannerOffset =
 
 		<slot name="head"></slot>
 
-		<link
-  rel="stylesheet"
-  href="https://unpkg.com/@milkdown/theme-nord@7.18.0/lib/style.css"
-/>
 
 		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
 
@@ -169,6 +165,335 @@ const bannerOffset =
 	'banner-height-home': `${BANNER_HEIGHT_HOME}vh`,
 	'banner-height': `${BANNER_HEIGHT}vh`,
 }}>
+/* ========= MILKDOWN EDITOR THEME ========= */
+
+/* Editor principal */
+.operation-item
+{
+	  color: var(--text-primary) !important;
+}
+
+.operation-item:hover
+{
+	background-color: var(--btn-plain-bg-hover) !important; 
+}
+.milkdown, 
+.milkdown-editor {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+}
+
+/* Menú slash principal */
+.milkdown-slash-menu {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--line-divider) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+  border-radius: 0.5rem !important;
+  max-height: 360px !important;
+  width: 300px !important;
+  overflow: hidden !important;
+  margin-top: 8.5rem !important;
+  z-index: 9999 !important;
+  position: absolute !important;
+}
+
+/* Tab group - nav principal */
+.milkdown-slash-menu .tab-group {
+  background: transparent !important;
+  border-bottom: 1px solid var(--line-divider) !important;
+  padding: 0.5rem !important;
+}
+
+.milkdown-slash-menu .tab-group ul {
+  display: flex !important;
+  gap: 0.25rem !important;
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.milkdown-slash-menu .tab-group li {
+  color: var(--text-secondary) !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0.5rem 0.875rem !important;
+  cursor: pointer !important;
+  border-radius: 0.375rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease !important;
+  margin: 0 !important;
+  display: block !important;
+  gap: 0 !important;
+}
+
+.milkdown-slash-menu .tab-group li:hover {
+  color: var(--text-primary) !important;
+  background: var(--btn-plain-bg-hover) !important;
+}
+
+.milkdown-slash-menu .tab-group li.selected {
+  color: var(--text-primary) !important;
+  background: var(--btn-plain-bg-hover) !important;
+}
+
+/* Menu groups - contenedor con scroll */
+.milkdown-slash-menu .menu-groups {
+  background: transparent !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  padding: 0.25rem !important;
+}
+
+/* Scrollbar */
+.milkdown-slash-menu .menu-groups::-webkit-scrollbar {
+  width: 15px !important;
+}
+
+.milkdown-slash-menu .menu-groups::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.milkdown-slash-menu .menu-groups::-webkit-scrollbar-thumb {
+  background: var(--line-divider) !important;
+  border-radius: 3px !important;
+}
+
+/* Menu group individual */
+.milkdown-slash-menu .menu-group {
+  margin-bottom: 0.5rem !important;
+}
+
+.milkdown-slash-menu .menu-group h6 {
+  color: var(--text-secondary) !important;
+  opacity: 0.7 !important;
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 0.5rem 0.75rem 0.25rem !important;
+  margin: 0 !important;
+}
+
+/* Lista de items */
+.milkdown-slash-menu .menu-group > ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Items individuales del menú */
+.milkdown-slash-menu .menu-group > ul > li {
+  background: transparent !important;
+  padding: 0.5rem 0.75rem !important;
+  margin: 0.125rem 0 !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  font-size: 0.875rem !important;
+}
+
+/* IMPORTANTE: Forzar color en span de texto */
+.milkdown-slash-menu .menu-group > ul > li > span:not(.milkdown-icon) {
+  color: var(--text-primary) !important;
+  font-weight: 400 !important;
+}
+
+/* Item hover */
+.milkdown-slash-menu .menu-group > ul > li.hover,
+.milkdown-slash-menu .menu-group > ul > li:hover {
+  background: var(--btn-plain-bg-hover) !important;
+}
+
+
+.milkdown-icon svg path {
+  fill: var(--text-secondary) !important;
+}
+
+/* Mantener color del texto en hover */
+.milkdown-slash-menu .menu-group > ul > li.hover > span:not(.milkdown-icon),
+.milkdown-slash-menu .menu-group > ul > li:hover > span:not(.milkdown-icon) {
+  color: var(--text-primary) !important;
+}
+
+/* Iconos */
+.milkdown-slash-menu .milkdown-icon {
+  display: flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+
+.milkdown-slash-menu .menu-group > ul > li.hover .milkdown-icon svg,
+.milkdown-slash-menu .menu-group > ul > li:hover .milkdown-icon svg {
+  color: var(--primary) !important;
+  fill: var(--primary) !important;
+}
+
+/* Evitar overflow */
+.milkdown-slash-menu[style*="top"] {
+  max-height: min(360px, calc(100vh - 100px)) !important;
+}
+
+.milkdown-slash-menu .menu-groups[style*="top"] {
+  max-height: min(300px, calc(100vh - 200px)) !important;
+}
+
+/* Placeholder */
+.milkdown .ProseMirror p.is-empty::before {
+  color: var(--text-secondary) !important;
+  opacity: 0.6 !important;
+}
+
+.milkdown .ProseMirror{
+	padding: 110px 120px;
+}
+/* Headings */
+.milkdown h1, .milkdown h2, .milkdown h3,
+.milkdown h4, .milkdown h5, .milkdown h6 {
+  color: var(--text-primary) !important;
+}
+
+/* Code */
+.milkdown pre {
+  background: var(--inline-code-bg) !important;
+  color: var(--text-primary) !important;
+  border-radius: 0.375rem !important;
+  padding: 1rem !important;
+  overflow-x: auto !important;
+}
+
+.milkdown code {
+  background: var(--inline-code-bg) !important;
+  color: var(--text-primary) !important;
+  border-radius: 0.25rem !important;
+  padding: 0.125rem 0.375rem !important;
+  font-size: 0.875em !important;
+}
+
+.milkdown pre code {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* Links */
+.milkdown a {
+  color: var(--primary) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+/* Blockquotes */
+.milkdown blockquote {
+  border-left: 3px solid var(--primary) !important;
+  color: var(--text-secondary) !important;
+  padding-left: 1rem !important;
+  margin: 1rem 0 !important;
+  font-style: italic !important;
+}
+
+/* Tables */
+.milkdown table {
+  border-color: var(--line-divider) !important;
+  border-collapse: collapse !important;
+  width: 100% !important;
+  margin: 1rem 0 !important;
+}
+
+.milkdown td,
+.milkdown th {
+  border: 1px solid var(--line-divider) !important;
+  padding: 0.75rem !important;
+  color: var(--text-primary) !important;
+}
+
+.milkdown th {
+  background: var(--btn-plain-bg-hover) !important;
+  font-weight: 600 !important;
+}
+
+/* Lists */
+.milkdown ul,
+.milkdown ol {
+  color: var(--text-primary) !important;
+  padding-left: 1.5rem !important;
+}
+
+.milkdown li {
+  color: var(--text-primary) !important;
+  margin: 0.25rem 0 !important;
+}
+
+
+/* Selecciona el elemento con la clase de Crepe cuando está vacío */
+.crepe-placeholder::before {
+  content: attr(data-placeholder);
+  color: var(--text-secondary) !important;
+  /* Asegura que herede el estilo de fuente del editor */
+  font-style: italic; 
+  opacity: 0.7;
+}
+
+/* En algunos casos, Milkdown usa selectores más específicos, 
+   puedes forzarlo así si el anterior falla: */
+.milkdown .crepe-placeholder::before {
+  color: var(--text-secondary) !important;
+}
+
+/* Limpieza de estilos internos de Crepe para que respeten tu tema */
+
+/* 1. Forzar colores en el editor */
+.milkdown .ProseMirror {
+  color: var(--text-primary) !important;
+  background-color: transparent !important;
+}
+
+/* 2. El Slash Menu (Este es el que suele fallar en modo oscuro) */
+.milkdown-slash-menu {
+  /* Usamos tus variables de post/card */
+  background-color: var(--card-bg) !important; 
+  border: 1px solid var(--line-divider) !important;
+  color: var(--text-primary) !important;
+}
+
+/* 3. Items del Menú */
+.milkdown-slash-menu .menu-group li {
+  color: var(--text-primary) !important;
+}
+
+.milkdown-slash-menu .menu-group li:hover,
+.milkdown-slash-menu .menu-group li.hover {
+  background-color: var(--btn-plain-bg-hover) !important;
+}
+
+.milkdown-slash-menu .milkdown-icon svg,
+.milkdown-slash-menu .milkdown-icon svg path {
+
+/* Aunque aqui quisiera que fuera blanco y negro depende del modo*/
+  fill: var(--primary) !important;
+}
+
+.milkdown-slash-menu li:hover .milkdown-icon svg path {
+  fill: var(--primary) !important;
+}
+
+/* 5. Placeholder en Modo Oscuro */
+.crepe-placeholder::before {
+  color: var(--text-secondary) !important;
+  opacity: 0.4 !important; /* Menos opacidad en oscuro ayuda a la estética */
+}
+
+/* 6. Tabs superiores del menú */
+.milkdown-slash-menu .tab-group li.selected {
+  background-color: var(--btn-plain-bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+/* ========= FIN MILKDOWN ========= */
 @tailwind components;
 @layer components {
 	.enable-banner.is-home #banner-wrapper {
