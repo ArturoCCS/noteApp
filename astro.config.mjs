@@ -1,3 +1,4 @@
+import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
@@ -24,11 +25,10 @@ import { parseDirectiveNode } from "./src/plugins/remark-directive-rehype.js";
 import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 
-import react from "@astrojs/react";
-
 // https://astro.build/config
 export default defineConfig({
-    site: "https://fuwari.vercel.app/",
+    adapter: vercel(),
+    site: "/",
     base: "/",
     trailingSlash: "always",
     integrations: [tailwind({
