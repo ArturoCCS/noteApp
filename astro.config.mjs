@@ -31,7 +31,7 @@ import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 
 export default defineConfig({
     adapter: vercel(),
-    site: "/",
+    site: "https://note-app.vercel.app",
     base: "/",
     trailingSlash: "always",
     integrations: [tailwind({
