@@ -216,38 +216,43 @@ const isStudy = entry.type === "study";
     </a>
   </div>
 </MainGridLayout>
-
 <script>
-  function setupDeleteButton() {
-    const deleteBtn = document.getElementById("delete-post-btn");
+  function initDeleteHandler() {
+    document.addEventListener("click", async (e) => {
+      const target = e.target;
+      if (!(target instanceof Element)) return;
+      const btn = target.closest("#delete-post-btn");
+      if (!btn) return;
 
-    if (!deleteBtn) return;
-
-    deleteBtn.addEventListener("click", () => {
-      if (typeof window.openConfirmDialog === "function") {
-        window.openConfirmDialog(async () => {
-          const id = deleteBtn.dataset.id;
-          try {
-            const response = await fetch("/api/delete-post/", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ id }),
-            });
-
-            if (response.ok) {
-              window.location.href = "/";
-            } else {
-              alert("Error al eliminar el post");
-            }
-          } catch (error) {
-            console.error(error);
-            alert("Error de conexión");
-          }
-        });
+      if (typeof window.openConfirmDialog !== "function") {
+        console.warn("ConfirmDialog aún no está listo");
+        return;
       }
+
+      window.openConfirmDialog(async () => {
+        const id = (btn as HTMLElement).dataset.id;
+        if (!id) return;
+
+        try {
+          const response = await fetch("/api/delete-post/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id }),
+          });
+
+          if (response.ok) {
+            window.location.href = "/";
+          } else {
+            alert("Error al eliminar el post");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error de conexión");
+        }
+      });
     });
   }
 
-  setupDeleteButton();
-  document.addEventListener("astro:page-load", setupDeleteButton);
+  initDeleteHandler();
+  document.addEventListener("astro:page-load", initDeleteHandler);
 </script>

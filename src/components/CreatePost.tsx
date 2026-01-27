@@ -1,3 +1,6 @@
+/** biome-ignore-all lint/a11y/noLabelWithoutControl: <explanation> */
+/** biome-ignore-all lint/suspicious/noAssignInExpressions: <explanation> */
+/** biome-ignore-all lint/a11y/useButtonType: <explanation> */
 import { useRef, useState } from "react";
 import { Editor } from "./Editor";
 import EditorStudyTips from "./EditorStudyTips";
@@ -55,6 +58,8 @@ export default function EditorForm() {
       }),
     });
 
+    
+    window.location.href = "/";
 
   }
 
