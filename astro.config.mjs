@@ -30,6 +30,7 @@ import { remarkExcerpt } from "./src/plugins/remark-excerpt.js";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 
 export default defineConfig({
+    output: 'server',
     adapter: vercel(),
     site: "https://note-app.vercel.app",
     base: "/",
