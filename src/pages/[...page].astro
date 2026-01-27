@@ -1,23 +1,48 @@
 ---
-import type { GetStaticPaths } from "astro";
+import type { Page } from "astro";
 import Pagination from "../components/control/Pagination.astro";
 import PostPage from "../components/PostPage.astro";
 import { PAGE_SIZE } from "../constants/constants";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 import { getSortedPosts } from "../server/firebase/get-posts";
+import type { Post } from "../types/Post";
 
-export const getStaticPaths = (async ({ paginate }) => {
-	const allBlogPosts = await getSortedPosts();
-	return paginate(allBlogPosts, { pageSize: PAGE_SIZE });
-}) satisfies GetStaticPaths;
-// https://github.com/withastro/astro/issues/6507#issuecomment-1489916992
-
-const { page } = Astro.props;
 export const prerender = false;
-const len = page.data.length;
----
 
+const currentPage = Number(Astro.url.searchParams.get("page") ?? 1);
+
+const allPosts = await getSortedPosts();
+
+const total = allPosts.length;
+const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+const start = (currentPage - 1) * PAGE_SIZE;
+const end = Math.min(start + PAGE_SIZE, total);
+
+const data = allPosts.slice(start, end);
+
+const page: Page<Post> = {
+	data,
+	start,
+	end,
+	size: PAGE_SIZE,
+	currentPage,
+	lastPage,
+	total,
+	url: {
+current: Astro.url.pathname,
+next: currentPage < lastPage
+? `${Astro.url.pathname}?page=${currentPage + 1}`
+: undefined,
+prev: currentPage > 1
+? `${Astro.url.pathname}?page=${currentPage - 1}`
+: undefined,
+first: undefined,
+last: undefined
+},
+};
+---
 <MainGridLayout>
-    <PostPage page={page}></PostPage>
-    <Pagination class="mx-auto onload-animation" page={page} style={`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`}></Pagination>
+	<PostPage page={page} />
+	<Pagination class="mx-auto onload-animation" page={page} />
 </MainGridLayout>

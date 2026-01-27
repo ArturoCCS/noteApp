@@ -1,5 +1,5 @@
 ---
-import { getSortedPosts } from "@/server/firebase/get-posts";
+import { getPostBySlug } from "@/server/firebase/get-posts";
 import License from "@components/misc/License.astro";
 import Markdown from "@components/misc/Markdown.astro";
 import ConfirmDialog from "@components/ui/ConfirmDialog.astro";
@@ -7,196 +7,245 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { Icon } from "astro-icon/components";
-import MarkdownIt from 'markdown-it';
+import MarkdownIt from "markdown-it";
 import { licenseConfig } from "src/config";
 import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
 import StudyTools from "@components/study/StudyTools";
-const isAdmin = true; 
 
-export async function getStaticPaths() {
-    const blogEntries = await getSortedPosts();
-    
+export const prerender = false;
+const isAdmin = true;
 
-    return blogEntries.map((entry) => ({
-        params: { slug: entry.slug },
-        props: { entry },
-    }));
+/* ------------------------------
+   Obtener slug dinámico
+-------------------------------- */
+const slugParam = Astro.params.slug;
+const slug = Array.isArray(slugParam) ? slugParam.join("/") : slugParam;
+
+/* ------------------------------
+   Obtener post desde Firestore
+-------------------------------- */
+const entry = slug ? await getPostBySlug(slug) : null;
+
+if (!entry) {
+  return Astro.redirect("/404");
 }
 
-const { entry } = Astro.props;
+/* ------------------------------
+   Markdown
+-------------------------------- */
 const md = new MarkdownIt();
-const htmlContent = md.render(entry.content || "");
+const htmlContent = md.render(entry.content ?? "");
 
-const publishedDate = new Date(entry.published);
+/* ------------------------------
+   Fechas y SEO
+-------------------------------- */
+const publishedDate = entry.published ? new Date(entry.published) : new Date();
 const updatedDate = entry.updated ? new Date(entry.updated) : undefined;
 const defaultLang = siteConfig.lang.replace("_", "-");
 
 const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: entry.title,
-    description: entry.description || entry.title,
-    keywords: entry.tags,
-    author: {
-        "@type": "Person",
-        name: profileConfig.name,
-        url: Astro.site,
-    },
-    datePublished: formatDateToYYYYMMDD(publishedDate),
-    inLanguage: defaultLang,
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: entry.title,
+  description: entry.description || entry.title,
+  keywords: entry.tags,
+  author: {
+    "@type": "Person",
+    name: profileConfig.name,
+    url: Astro.site,
+  },
+  datePublished: formatDateToYYYYMMDD(publishedDate),
+  inLanguage: defaultLang,
 };
 
 const isStudy = entry.type === "study";
-
 ---
-<MainGridLayout banner={entry.image} title={entry.title} description={entry.description} lang={defaultLang} setOGTypeArticle={true}>
-    <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
-    
-    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
-        <div id="post-container" class="card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full">
-            
-            <div class="flex flex-row text-black/30 dark:text-white/30 gap-5 mb-3 transition onload-animation">
-                <div class="flex flex-row items-center">
-                    <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
-                        <Icon name="material-symbols:notes-rounded"></Icon>
-                    </div>
-                    <div class="text-sm">{entry.words} {i18n(I18nKey.wordsCount)}</div>
-                </div>
-                <div class="flex flex-row items-center">
-                    <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
-                        <Icon name="material-symbols:schedule-outline-rounded"></Icon>
-                    </div>
-                    <div class="text-sm">
-                        {entry.minutes} {i18n(entry.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}
-                    </div>
-                </div>
-                {isAdmin && (
-                <a
-                    href={`/editor/${entry.slug}/`}
-                    id={entry.id}
-                    class="ml-auto flex items-center justify-center h-8 w-8 rounded-md
-                        bg-black/5 dark:bg-white/10
-                        hover:bg-black/10 dark:hover:bg-white/20
-                        text-black/50 dark:text-white/50 transition"
-                    aria-label="Editar post"
-                >
-                    <Icon name="material-symbols:edit-rounded" />
-                </a>
-                )}
 
-                {isAdmin && (
-                <>
-                    <button
-                    id="delete-post-btn"
-                    data-id={entry.id}
-                    class="flex items-center justify-center h-8 w-8 rounded-md bg-red-600/30 hover:bg-red-500/60 text-black/40 dark:text-white/50 transition"
-                    aria-label="Eliminar post"
-                    >
-                    <Icon name="material-symbols:delete-rounded" />
-                    </button>
+<MainGridLayout
+  banner={entry.image}
+  title={entry.title}
+  description={entry.description}
+  lang={defaultLang}
+  setOGTypeArticle={true}
+>
+  <script
+    is:inline
+    slot="head"
+    type="application/ld+json"
+    set:html={JSON.stringify(jsonLd)}
+  ></script>
 
-                    <ConfirmDialog
-                    id="delete-post-dialog"
-                    title="Eliminar post"
-                    description="Este post se eliminará permanentemente. No podrás recuperarlo."
-                    confirmText="Eliminar"
-                    cancelText="Cancelar"
-                    danger={true}
-                    />
-                </>
-                )}
-
-
-
-            </div>
-
-         
-
-            <div class="relative onload-animation">
-                <div
-                    data-pagefind-body data-pagefind-weight="10" data-pagefind-meta="title"
-                    class="transition w-full block font-bold mb-3
-                    text-3xl md:text-[2.25rem]/[2.75rem]
-                    text-black/90 dark:text-white/90
-                    md:before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)]
-                    before:absolute before:top-[0.75rem] before:left-[-1.125rem]
-                ">
-                    {entry.title}
-                </div>
-            </div>
-
-            <div class="onload-animation">
-                <PostMetadata
-                        class="mb-5"
-                        published={publishedDate}
-                        updated={updatedDate}
-                        tags={entry.tags}
-                        category={entry.category}
-                ></PostMetadata>
-                {!entry.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
-            </div>
-
-            {entry.image &&
-                <ImageWrapper id="post-cover" src={entry.image} class="mb-8 rounded-xl banner-container onload-animation" loading="eager"/>
-            }
-
-            <Markdown class="mb-6 markdown-content onload-animation">
-                {isStudy && (
-                    <StudyTools client:load content={entry.content ?? ""} />
-                )}
-                <article set:html={htmlContent} />
-            </Markdown>
-            
-            
-            <!-- {licenseConfig.enable && <License title={entry.title} slug={entry.slug} pubDate={publishedDate} class="mb-6 rounded-xl license-container onload-animation"></License>} -->
-
+  <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
+    <div
+      id="post-container"
+      class="card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full"
+    >
+      <div class="flex flex-row text-black/30 dark:text-white/30 gap-5 mb-3 transition onload-animation">
+        <div class="flex flex-row items-center">
+          <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
+            <Icon name="material-symbols:notes-rounded" />
+          </div>
+          <div class="text-sm">
+            {entry.words ?? 0} {i18n(I18nKey.wordsCount)}
+          </div>
         </div>
+
+        <div class="flex flex-row items-center">
+          <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
+            <Icon name="material-symbols:schedule-outline-rounded" />
+          </div>
+          <div class="text-sm">
+            {entry.minutes ?? 1}
+            {i18n(
+              entry.minutes === 1
+                ? I18nKey.minuteCount
+                : I18nKey.minutesCount
+            )}
+          </div>
+        </div>
+
+        {isAdmin && (
+          <a
+            href={`/editor/${entry.slug}/`}
+            id={entry.id}
+            class="ml-auto flex items-center justify-center h-8 w-8 rounded-md
+              bg-black/5 dark:bg-white/10
+              hover:bg-black/10 dark:hover:bg-white/20
+              text-black/50 dark:text-white/50 transition"
+            aria-label="Editar post"
+          >
+            <Icon name="material-symbols:edit-rounded" />
+          </a>
+        )}
+
+        {isAdmin && (
+          <>
+            <button
+              id="delete-post-btn"
+              data-id={entry.id}
+              class="flex items-center justify-center h-8 w-8 rounded-md
+                bg-red-600/30 hover:bg-red-500/60
+                text-black/40 dark:text-white/50 transition"
+              aria-label="Eliminar post"
+            >
+              <Icon name="material-symbols:delete-rounded" />
+            </button>
+
+            <ConfirmDialog
+              id="delete-post-dialog"
+              title="Eliminar post"
+              description="Este post se eliminará permanentemente. No podrás recuperarlo."
+              confirmText="Eliminar"
+              cancelText="Cancelar"
+              danger={true}
+            />
+          </>
+        )}
+      </div>
+
+      <div class="relative onload-animation">
+        <div
+          data-pagefind-body
+          data-pagefind-weight="10"
+          data-pagefind-meta="title"
+          class="transition w-full block font-bold mb-3
+            text-3xl md:text-[2.25rem]/[2.75rem]
+            text-black/90 dark:text-white/90
+            md:before:w-1 before:h-5 before:rounded-md
+            before:bg-[var(--primary)]
+            before:absolute before:top-[0.75rem] before:left-[-1.125rem]"
+        >
+          {entry.title}
+        </div>
+      </div>
+
+      <div class="onload-animation">
+        <PostMetadata
+          class="mb-5"
+          published={publishedDate}
+          updated={updatedDate}
+          tags={entry.tags}
+          category={entry.category}
+        />
+        {!entry.image && (
+          <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>
+        )}
+      </div>
+
+      {entry.image && (
+        <ImageWrapper
+          id="post-cover"
+          src={entry.image}
+          class="mb-8 rounded-xl banner-container onload-animation"
+          loading="eager"
+        />
+      )}
+
+      <Markdown class="mb-6 markdown-content onload-animation">
+        {isStudy && (
+          <StudyTools client:load content={entry.content ?? ""} />
+        )}
+        <article set:html={htmlContent} />
+      </Markdown>
+
+      {licenseConfig.enable && (
+        <License
+          title={entry.title}
+          slug={entry.slug}
+          pubDate={publishedDate}
+          class="mb-6 rounded-xl license-container onload-animation"
+        />
+      )}
     </div>
+  </div>
 
-    <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full onload-animation">
-        <a href="/" class="w-full font-bold overflow-hidden active:scale-95">
-            <div class="btn-card rounded-2xl w-full h-[3.75rem] px-4 flex items-center justify-start gap-4">
-                <Icon name="material-symbols:chevron-left-rounded" class="text-[2rem] text-[var(--primary)]" />
-                <div class="text-black/75 dark:text-white/75">Volver al inicio</div>
-            </div>
-        </a>
-    </div>
-
-  
-
+  <div class="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full onload-animation">
+    <a href="/" class="w-full font-bold overflow-hidden active:scale-95">
+      <div class="btn-card rounded-2xl w-full h-[3.75rem] px-4 flex items-center gap-4">
+        <Icon
+          name="material-symbols:chevron-left-rounded"
+          class="text-[2rem] text-[var(--primary)]"
+        />
+        <div class="text-black/75 dark:text-white/75">
+          Volver al inicio
+        </div>
+      </div>
+    </a>
+  </div>
 </MainGridLayout>
+
 <script>
   function setupDeleteButton() {
     const deleteBtn = document.getElementById("delete-post-btn");
-    
-    if (deleteBtn) {
-      deleteBtn.addEventListener("click", () => {
-        if (typeof (window as any).openConfirmDialog === "function") {
-            (window as any).openConfirmDialog(async () => {
-            const id = deleteBtn.dataset.id;
-            try {
-              const response = await fetch("/api/delete-post/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id }),
-              });
 
-              if (response.ok) {
-                window.location.href = "/";
-              } else {
-                alert("Error al eliminar el post");
-              }
-            } catch (error) {
-              console.error("Error:", error);
-              alert("Ocurrió un error de conexión");
+    if (!deleteBtn) return;
+
+    deleteBtn.addEventListener("click", () => {
+      if (typeof window.openConfirmDialog === "function") {
+        window.openConfirmDialog(async () => {
+          const id = deleteBtn.dataset.id;
+          try {
+            const response = await fetch("/api/delete-post/", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id }),
+            });
+
+            if (response.ok) {
+              window.location.href = "/";
+            } else {
+              alert("Error al eliminar el post");
             }
-          });
-        }
-      });
-    }
+          } catch (error) {
+            console.error(error);
+            alert("Error de conexión");
+          }
+        });
+      }
+    });
   }
 
   setupDeleteButton();

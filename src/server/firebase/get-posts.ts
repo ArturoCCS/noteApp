@@ -3,14 +3,22 @@ import { db } from "./admin";
 
 export async function getSortedPosts() {
   try {
-    const snapshot = await db.collection("posts").orderBy("published", "desc").get();
+    const snapshot = await db
+      .collection("posts")
+      .orderBy("published", "desc")
+      .get();
+
     return snapshot.docs.map(doc => {
       const data = doc.data();
       return {
         id: doc.id,
         ...data,
-        published: data.published?.toDate ? data.published.toDate() : data.published,
-        updated: data.updated?.toDate ? data.updated.toDate() : data.updated,
+        published: data.published?.toDate
+          ? data.published.toDate()
+          : data.published,
+        updated: data.updated?.toDate
+          ? data.updated.toDate()
+          : data.updated,
       } as Post;
     });
   } catch (error) {
@@ -22,7 +30,6 @@ export async function getSortedPosts() {
 export async function getPostById(id: string) {
   try {
     const doc = await db.collection("posts").doc(id).get();
-
     if (!doc.exists) return null;
 
     const data = doc.data();
@@ -39,11 +46,36 @@ export async function getPostById(id: string) {
   }
 }
 
+/* ✅ ESTA ES LA PIEZA QUE FALTABA */
+export async function getPostBySlug(slug: string) {
+  try {
+    const snapshot = await db
+      .collection("posts")
+      .where("slug", "==", slug)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) return null;
+
+    const doc = snapshot.docs[0];
+    const data = doc.data();
+
+    return {
+      id: doc.id,
+      ...data,
+      published: data?.published?.toDate?.() ?? data?.published,
+      updated: data?.updated?.toDate?.() ?? data?.updated,
+    } as Post;
+  } catch (error) {
+    console.error("Error al traer post por slug:", error);
+    return null;
+  }
+}
 
 export async function getTagList() {
   const allPosts = await getSortedPosts();
-  const countMap: { [key: string]: number } = {};
-  
+  const countMap: Record<string, number> = {};
+
   allPosts.forEach(post => {
     (post.tags || []).forEach(tag => {
       countMap[tag] = (countMap[tag] || 0) + 1;
@@ -57,7 +89,7 @@ export async function getTagList() {
 
 export async function getCategoryList() {
   const allPosts = await getSortedPosts();
-  const countMap: { [key: string]: number } = {};
+  const countMap: Record<string, number> = {};
 
   allPosts.forEach(post => {
     const category = post.category || "Uncategorized";
@@ -69,6 +101,6 @@ export async function getCategoryList() {
     .map(name => ({
       name,
       count: countMap[name],
-      url: `/archive/?category/${name}`
+      url: `/archive/?category=${name}`,
     }));
 }
