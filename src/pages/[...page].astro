@@ -13,7 +13,7 @@ export const getStaticPaths = (async ({ paginate }) => {
 // https://github.com/withastro/astro/issues/6507#issuecomment-1489916992
 
 const { page } = Astro.props;
-
+export const prerender = false;
 const len = page.data.length;
 ---
 
