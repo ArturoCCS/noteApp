@@ -17,7 +17,7 @@ export const siteConfig: SiteConfig = {
 	},
 	banner: {
 		enable: true,
-		src: "https://picfiles.alphacoders.com/363/thumb-1920-363959.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
+		src: "https://i.pinimg.com/1200x/2e/c4/02/2ec40244c2ed9f466384797e81db36e6.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
 		position: "center", // Equivalent to object-position, only supports 'top', 'center', 'bottom'. 'center' by default
 		credit: {
 			enable: true, // Display the credit text of the banner image
@@ -54,7 +54,7 @@ export const navBarConfig: NavBarConfig = {
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "https://images4.alphacoders.com/751/thumb-1920-75148.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
+	avatar: "https://i.pinimg.com/736x/e3/73/80/e373805ebd05078bdf57f02b7353a514.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
 	name: "",
 	bio: "",
 	links: [

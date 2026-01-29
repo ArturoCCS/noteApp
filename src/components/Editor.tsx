@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
 import { Crepe } from "@milkdown/crepe";
 import "@milkdown/crepe/theme/common/style.css";
 import "@milkdown/crepe/theme/frame.css";
@@ -16,13 +17,7 @@ interface EditorProps {
 const templates: Record<PostType, string> = {
   blog: `# Título del post
 
-Escribe aquí tu contenido ✨
-
-## Introducción
-
-## Desarrollo
-
-## Conclusión
+Escribe aquí tu contenido
 `,
 
   study: `# Tema de estudio
@@ -100,7 +95,6 @@ export function Editor({
     onChange?.(md);
   };
 
-  // Esperamos a que Milkdown esté realmente listo
   requestAnimationFrame(() => {
     ready = true;
     safeUpdate();
@@ -121,8 +115,18 @@ export function Editor({
     <div className="card-base border border-[var(--line-color)] bg-[var(--card-bg)] relative">
 
       <div className="flex justify-between text-xs px-4 py-2 border-b border-[var(--line-color)] opacity-70">
-        <span>{words} palabras · {minutes} min lectura</span>
-        <span className="capitalize">{type}</span>
+        <span className="  
+          text-xs
+          font-semibold
+          tracking-widest
+        text-black/60
+        dark:text-white/60">{words} palabras · {minutes} min lectura</span>
+        <span className="capitalize
+          text-xs
+          font-semibold
+          tracking-widest
+        text-black/60
+        dark:text-white/60">{type}</span>
       </div>
 
       <div

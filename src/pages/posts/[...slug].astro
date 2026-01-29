@@ -36,7 +36,10 @@ if (!entry) {
 /* ------------------------------
    Markdown
 -------------------------------- */
-const md = new MarkdownIt();
+const md = new MarkdownIt({
+  breaks: false,
+  html: true,
+});
 const htmlContent = md.render(entry.content ?? "");
 
 /* ------------------------------
@@ -188,7 +191,8 @@ const isStudy = entry.type === "study";
         {isStudy && (
           <StudyTools client:load content={entry.content ?? ""} />
         )}
-        <article set:html={htmlContent} />
+        <article set:html={md.render(entry.content ?? "")} />
+
       </Markdown>
 
       {licenseConfig.enable && (

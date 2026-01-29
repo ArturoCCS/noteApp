@@ -1,3 +1,7 @@
+/** biome-ignore-all lint/a11y/useButtonType: <explanation> */
+/** biome-ignore-all lint/suspicious/noAssignInExpressions: <explanation> */
+/** biome-ignore-all lint/a11y/noLabelWithoutControl: <explanation> */
+
 import type { Post } from "@/types/Post";
 import { Icon } from "@iconify/react";
 import { useRef, useState } from "react";
