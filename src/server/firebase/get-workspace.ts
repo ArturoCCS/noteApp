@@ -17,6 +17,16 @@ export async function getWorkspaceBySlug(
 
 		const data = doc.data() ?? {};
 
+		// Normalize pages.about to always be a string
+		const rawPages = data.pages ?? {};
+		const aboutRaw = rawPages.about;
+		const aboutString: string =
+			typeof aboutRaw === "string"
+				? aboutRaw
+				: typeof aboutRaw === "object" && aboutRaw !== null && typeof aboutRaw.content === "string"
+					? aboutRaw.content
+					: "";
+
 		return {
 			slug,
 			ownerUid: data.ownerUid ?? "",
@@ -29,7 +39,7 @@ export async function getWorkspaceBySlug(
 				...expressiveCodeConfig,
 				...(data.expressiveCode ?? {}),
 			},
-			pages: data.pages ?? {},
+			pages: { ...rawPages, about: aboutString },
 			updatedAt: data.updatedAt?.toDate?.() ?? undefined,
 		} as WorkspaceConfig;
 	} catch (error) {

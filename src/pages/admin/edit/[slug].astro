@@ -16,8 +16,8 @@ if (!slug) throw new Error("Missing slug");
 const post = await getPostBySlug(auth.workspaceSlug, slug);
 if (!post) return Astro.redirect("/admin/");
 ---
-<MainGridLayout title="Editar post" description="Editar post">
+<MainGridLayout title="Editar post" description="Editar post" isAdmin={true}>
   <div class="card-base p-6">
-    <PostEditor client:only="react" post={post} />
+    <PostEditor client:only="react" post={post} workspaceSlug={auth.workspaceSlug} />
   </div>
 </MainGridLayout>

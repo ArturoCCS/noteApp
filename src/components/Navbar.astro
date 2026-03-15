@@ -13,19 +13,35 @@ import NavMenuPanel from "./widget/NavMenuPanel.astro";
 interface Props {
 	class?: string;
 	workspaceSlug?: string;
+	isAdmin?: boolean;
 }
 
 const className = Astro.props.class;
-const { workspaceSlug } = Astro.props;
+const { workspaceSlug, isAdmin } = Astro.props;
 
-let links: NavBarLink[] = navBarConfig.links.map(
-	(item: NavBarLink | LinkPreset): NavBarLink => {
-		if (typeof item === "number") {
-			return LinkPresets[item];
-		}
-		return item;
-	},
-);
+let links: NavBarLink[];
+
+if (isAdmin) {
+	links = [
+		{ name: "Dashboard", url: "/admin/" },
+		{ name: "Nuevo post", url: "/admin/new/" },
+		{ name: "Workspace", url: "/admin/workspace/" },
+	];
+} else if (workspaceSlug) {
+	links = [
+		{ name: "Inicio", url: `/w/${workspaceSlug}/` },
+		{ name: "Acerca de", url: `/w/${workspaceSlug}/about/` },
+	];
+} else {
+	links = navBarConfig.links.map(
+		(item: NavBarLink | LinkPreset): NavBarLink => {
+			if (typeof item === "number") {
+				return LinkPresets[item];
+			}
+			return item;
+		},
+	);
+}
 ---
 <div id="navbar" class="z-50 onload-animation">
     <div class="absolute h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->

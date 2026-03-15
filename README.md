@@ -100,6 +100,34 @@ This project is licensed under the MIT License.
 
 ## 🔐 Multi-Workspace Architecture
 
+### How it works
+
+This application is a **multi-workspace blogging platform** built on top of Astro + Firebase. Each admin user owns exactly one _workspace_ identified by a `workspaceSlug` custom claim on their Firebase Auth account.
+
+### Admin flow
+
+1. Visit `/admin/login` and sign in with Google.
+2. The server verifies the user's email against an allowlist in Firestore and sets custom claims (`admin: true`, `workspaceSlug: "<slug>"`).
+3. After login, admins are redirected to `/admin` – their workspace dashboard.
+
+### Admin route map
+
+| Route | Description |
+|:------|:------------|
+| `/admin/login` | Google OAuth login page |
+| `/admin` | Dashboard – lists all posts for the logged-in workspace |
+| `/admin/new` | Create a new post |
+| `/admin/edit/[slug]` | Edit an existing post |
+| `/admin/workspace` | Workspace settings (title, banner, profile, license, about) |
+
+### Public workspace route map
+
+| Route | Description |
+|:------|:------------|
+| `/w/[slug]` | Workspace home – paginated list of published posts |
+| `/w/[slug]/about` | About page – rendered from workspace's Markdown content |
+| `/w/[slug]/posts/[postSlug]` | Individual post reading page |
+
 ### Composite Post Document IDs
 
 Posts are stored in Firestore with a composite document ID:
@@ -123,6 +151,20 @@ Each post document includes the following required fields (in addition to conten
 | `workspaceId` | string | The `workspaceSlug` of the owning workspace (e.g. `arturo`)   |
 | `ownerUid`    | string | Firebase Auth UID of the admin who created it                 |
 | `slug`        | string | Human-readable slug (without workspace prefix)                |
+
+### Workspace document
+
+Workspace configuration is stored in Firestore at `workspaces/{workspaceSlug}`:
+
+| Field | Type | Description |
+|:------|:-----|:------------|
+| `slug` | string | Workspace identifier (unique, immutable) |
+| `ownerUid` | string | Firebase Auth UID of the owner |
+| `isPublic` | boolean | Controls public visibility at `/w/{slug}` |
+| `site` | object | Title, banner URL, theme, language |
+| `profile` | object | Name, avatar URL, bio, social links |
+| `license` | object | License name and URL |
+| `pages.about` | string | Markdown content for the About page |
 
 ### Required Firebase Custom Claims
 
@@ -154,19 +196,13 @@ await fetch("/api/auth/session", {
 });
 ```
 
-This sets a `__session` cookie that is verified on every admin API call.
+This sets a `session` cookie that is verified on every admin API call.
 
-### Public Post Links
+### Navigation
 
-Once a workspace is marked `isPublic: true` in Firestore (`workspaces/{slug}`), its posts are accessible at:
-
-```
-/w/{workspaceSlug}/posts/{postSlug}
-```
-
-For example: `/w/arturo/posts/my-first-post`
-
-The workspace about page is at `/w/{workspaceSlug}/about`.
+- **Admin pages** (`/admin/*`): The navbar shows admin-specific links (Dashboard, New Post, Workspace Settings).
+- **Public workspace pages** (`/w/[slug]/*`): The navbar shows workspace-scoped links (Inicio, Acerca de) pointing to the current workspace, not to global routes.
+- **Other pages**: The navbar shows the global site navigation configured in `src/config.ts`.
 
 ### Migration Safety
 
