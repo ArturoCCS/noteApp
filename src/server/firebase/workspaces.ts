@@ -10,7 +10,7 @@ export type WorkspaceDoc = {
   profile?: any;
   license?: any;
   expressiveCode?: any;
-  pages?: { about?: { content?: string } };
+  pages?: { about?: string };
   updatedAt?: any;
 };
 

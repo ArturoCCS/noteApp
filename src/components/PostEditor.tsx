@@ -9,9 +9,10 @@ import { Editor } from "./Editor";
 
 interface Props {
 	post: Post;
+	workspaceSlug?: string;
 }
 
-export default function PostEditor({ post }: Props) {
+export default function PostEditor({ post, workspaceSlug }: Props) {
 	const getMarkdownRef = useRef<() => string>(() => "");
 
 	const [title, setTitle] = useState(post.title ?? "");
@@ -69,6 +70,7 @@ export default function PostEditor({ post }: Props) {
 		});
 
 		alert("Post actualizado ✨");
+		window.location.href = "/admin/";
 	}
 
 	const inputBase = `
@@ -250,25 +252,44 @@ export default function PostEditor({ post }: Props) {
 			</div>
 
 			<div className="flex justify-end gap-4 pt-6 pb-12">
-				<div className="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full onload-animation">
+			<div className="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full onload-animation">
+				<a
+					href="/admin/"
+					className="w-full font-bold overflow-hidden active:scale-95"
+				>
+					<div className="btn-card rounded-2xl w-full h-[3.75rem] px-4 flex items-center justify-start gap-4">
+						<Icon
+							name="material-symbols:chevron-left-rounded"
+							className="text-[2rem] text-[var(--primary)]"
+							icon={""}
+						/>
+						<div className="text-black/75 dark:text-white/75">
+							Volver al admin
+						</div>
+					</div>
+				</a>
+				{workspaceSlug && (
 					<a
-						href={`/posts/${post.slug}/`}
+						href={`/w/${workspaceSlug}/posts/${post.slug}/`}
+						target="_blank"
+						rel="noopener noreferrer"
 						className="w-full font-bold overflow-hidden active:scale-95"
 					>
 						<div className="btn-card rounded-2xl w-full h-[3.75rem] px-4 flex items-center justify-start gap-4">
 							<Icon
-								name="material-symbols:chevron-left-rounded"
-								className="text-[2rem] text-[var(--primary)]"
+								name="material-symbols:open-in-new"
+								className="text-[1.5rem] text-[var(--primary)]"
 								icon={""}
 							/>
 							<div className="text-black/75 dark:text-white/75">
-								Volver al inicio
+								Ver público
 							</div>
 						</div>
 					</a>
-					<button
-						onClick={handleSave}
-						className="
+				)}
+				<button
+					onClick={handleSave}
+					className="
             btn-regular
             px-10
             h-15
@@ -279,11 +300,11 @@ export default function PostEditor({ post }: Props) {
             hover:scale-[1.03]
             active:scale-95
           "
-					>
-						Guardar
-					</button>
-				</div>
+				>
+					Guardar
+				</button>
 			</div>
 		</div>
+	</div>
 	);
 }

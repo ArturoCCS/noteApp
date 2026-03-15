@@ -60,7 +60,7 @@ export default function EditorForm() {
 			}),
 		});
 
-		window.location.href = "/";
+		window.location.href = "/admin/";
 	}
 
 	const inputBase = `

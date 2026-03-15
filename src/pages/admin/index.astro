@@ -12,17 +12,22 @@ if (!auth.workspaceSlug) throw new Error("Missing workspaceSlug claim");
 const posts = await getSortedPosts(auth.workspaceSlug);
 ---
 
-<MainGridLayout title="Admin" description="Admin">
+<MainGridLayout title="Admin" description="Admin" isAdmin={true}>
   <div class="card-base p-6">
     <div class="text-xs font-semibold uppercase tracking-widest opacity-70 mb-3">
       Workspace: {auth.workspaceSlug}
     </div>
 
-    <div class="flex justify-between items-center mb-5">
+    <div class="flex flex-wrap justify-between items-center mb-5 gap-2">
       <h1 class="text-2xl font-bold">Tus posts</h1>
-      <a class="btn-regular btn-plain px-6 h-10 rounded-[var(--radius-large)]" href="/admin/new/">
-        Nuevo
-      </a>
+      <div class="flex gap-2">
+        <a class="btn-regular btn-plain px-5 h-10 rounded-[var(--radius-large)] font-semibold" href="/admin/new/">
+          + Nuevo post
+        </a>
+        <a class="btn-regular btn-plain px-5 h-10 rounded-[var(--radius-large)] font-semibold" href="/admin/workspace/">
+          ⚙ Workspace
+        </a>
+      </div>
     </div>
 
     <div class="flex flex-col gap-2">
@@ -32,14 +37,15 @@ const posts = await getSortedPosts(auth.workspaceSlug);
             {p.title}
           </a>
           <a class="text-xs opacity-70" target="_blank" href={`/w/${auth.workspaceSlug}/posts/${p.slug}`}>
-            Ver público
+            Ver público ↗
           </a>
         </div>
       ))}
-    </div>
-
-    <div class="mt-6">
-      <a class="link text-[var(--primary)]" href="/admin/workspace/">Configurar entorno</a>
+      {posts.length === 0 && (
+        <div class="text-black/40 dark:text-white/40 text-sm text-center py-8">
+          Aún no hay posts en tu workspace.
+        </div>
+      )}
     </div>
   </div>
 </MainGridLayout>

@@ -9,6 +9,8 @@ export default function WorkspaceSettingsEditor() {
 
   useEffect(() => {
     (async () => {
+      // Bootstrap the workspace doc if it doesn't exist yet
+      await fetch("/api/workspace/bootstrap", { method: "POST" });
       const res = await fetch("/api/workspace/get");
       const json = await res.json();
       setWorkspace(json.workspace ?? {});
@@ -20,22 +22,22 @@ export default function WorkspaceSettingsEditor() {
 
   const w = workspace || {};
   w.site ||= {};
+  w.site.banner ||= { enable: false, src: "", position: "center", credit: { enable: false, text: "" } };
   w.profile ||= {};
   w.navBar ||= { links: [0, 1, 2, 3] };
   w.license ||= {};
   w.expressiveCode ||= {};
-  w.pages ||= { about: { content: "" } };
-  w.pages.about ||= { content: "" };
+  w.pages ||= {};
+  if (typeof w.pages.about !== "string") {
+    w.pages.about = "";
+  }
 
   async function save() {
     const updated = {
       ...w,
       pages: {
         ...w.pages,
-        about: {
-          ...w.pages.about,
-          content: aboutGetMdRef.current?.() ?? w.pages.about.content,
-        },
+        about: aboutGetMdRef.current?.() ?? w.pages.about,
       },
     };
 
@@ -60,18 +62,22 @@ export default function WorkspaceSettingsEditor() {
           className="w-full bg-transparent border-b border-[var(--line-divider)] py-2"
           placeholder="Título"
           value={w.site.title ?? ""}
-          onChange={(e) => {
-            const next = { ...w, site: { ...w.site, title: e.target.value } };
-            setWorkspace(next);
-          }}
+          onChange={(e) => setWorkspace({ ...w, site: { ...w.site, title: e.target.value } })}
         />
         <input
           className="w-full bg-transparent border-b border-[var(--line-divider)] py-2 mt-2"
           placeholder="Subtítulo"
           value={w.site.subtitle ?? ""}
+          onChange={(e) => setWorkspace({ ...w, site: { ...w.site, subtitle: e.target.value } })}
+        />
+        <input
+          className="w-full bg-transparent border-b border-[var(--line-divider)] py-2 mt-2"
+          placeholder="URL del banner (https://...)"
+          value={w.site.banner.src ?? ""}
           onChange={(e) => {
-            const next = { ...w, site: { ...w.site, subtitle: e.target.value } };
-            setWorkspace(next);
+            const bannerSrc = e.target.value;
+            const updatedBanner = { ...w.site.banner, src: bannerSrc, enable: !!bannerSrc };
+            setWorkspace({ ...w, site: { ...w.site, banner: updatedBanner } });
           }}
         />
       </section>
@@ -90,18 +96,49 @@ export default function WorkspaceSettingsEditor() {
           value={w.profile.avatar ?? ""}
           onChange={(e) => setWorkspace({ ...w, profile: { ...w.profile, avatar: e.target.value } })}
         />
+        <input
+          className="w-full bg-transparent border-b border-[var(--line-divider)] py-2 mt-2"
+          placeholder="Bio"
+          value={w.profile.bio ?? ""}
+          onChange={(e) => setWorkspace({ ...w, profile: { ...w.profile, bio: e.target.value } })}
+        />
+      </section>
+
+      <section className="card-base p-4">
+        <div className="text-xs font-semibold uppercase tracking-widest opacity-70 mb-2">Licencia</div>
+        <div className="flex items-center gap-3 mb-2">
+          <input
+            type="checkbox"
+            id="license-enable"
+            checked={w.license.enable ?? false}
+            onChange={(e) => setWorkspace({ ...w, license: { ...w.license, enable: e.target.checked } })}
+          />
+          <label htmlFor="license-enable" className="text-sm">Mostrar licencia en los posts</label>
+        </div>
+        <input
+          className="w-full bg-transparent border-b border-[var(--line-divider)] py-2"
+          placeholder="Nombre de la licencia (ej. CC BY-NC-SA 4.0)"
+          value={w.license.name ?? ""}
+          onChange={(e) => setWorkspace({ ...w, license: { ...w.license, name: e.target.value } })}
+        />
+        <input
+          className="w-full bg-transparent border-b border-[var(--line-divider)] py-2 mt-2"
+          placeholder="URL de la licencia"
+          value={w.license.url ?? ""}
+          onChange={(e) => setWorkspace({ ...w, license: { ...w.license, url: e.target.value } })}
+        />
       </section>
 
       <section className="card-base p-4">
         <div className="text-xs font-semibold uppercase tracking-widest opacity-70 mb-2">About</div>
         <Editor
-          initialValue={w.pages.about.content ?? ""}
+          initialValue={w.pages.about ?? ""}
           onReady={(getMd) => (aboutGetMdRef.current = getMd)}
         />
       </section>
 
       <div className="flex justify-end">
-        <button className="btn-regular btn-plain px-6 h-10 rounded-[var(--radius-large)]" onClick={save}>
+        <button className="btn-regular btn-plain px-6 h-10 rounded-[var(--radius-large)]" type="button" onClick={save}>
           Guardar
         </button>
       </div>
