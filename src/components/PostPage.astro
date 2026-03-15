@@ -2,7 +2,7 @@
 import type { Post } from "@/types/Post";
 import PostCard from "./PostCard.astro";
 
-const { page } = Astro.props;
+const { page, workspaceSlug } = Astro.props;
 
 let delay = 0;
 const interval = 50;
@@ -10,6 +10,11 @@ const interval = 50;
 
 <div class="transition flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4">
   {Array.isArray(page.data) && page.data.map((post: Post) => (
-    <PostCard post={post} class:list="onload-animation" style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms)`} />
+    <PostCard
+      post={post}
+      postUrl={workspaceSlug ? `/w/${workspaceSlug}/posts/${post.slug}/` : undefined}
+      class:list="onload-animation"
+      style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms)`}
+    />
   ))}
 </div>

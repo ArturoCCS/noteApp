@@ -5,11 +5,11 @@ import { i18n } from "../i18n/translation";
 import ImageWrapper from "./misc/ImageWrapper.astro";
 import PostMetadata from "./PostMeta.astro";
 
-const { post, style, class: className } = Astro.props;
+const { post, style, class: className, postUrl: postUrlProp } = Astro.props;
 
 const title = post.title;
 
-const url = `/posts/${post.slug}/`;
+const url = postUrlProp ?? `/posts/${post.slug}/`;
 const published = post.published ? new Date(post.published) : new Date();
 const updated = post.updated ? new Date(post.updated) : undefined;
 const tags = post.tags || [];

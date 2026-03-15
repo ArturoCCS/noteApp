@@ -1,0 +1,42 @@
+---
+export const prerender = false;
+
+import ArchivePanel from "@components/ArchivePanel.svelte";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getSortedPosts } from "@/server/firebase/get-posts";
+import { getWorkspaceBySlug } from "@/server/firebase/get-workspace";
+
+const { slug } = Astro.params as { slug: string };
+
+const workspace = await getWorkspaceBySlug(slug);
+
+if (!workspace || !workspace.isPublic) {
+	return Astro.redirect("/404");
+}
+
+const allPosts = await getSortedPosts(slug);
+
+const sortedPostsList = allPosts.map((post) => ({
+	...post,
+	published: String(post.published),
+	updated: post.updated ? String(post.updated) : undefined,
+	tags: post.tags ?? [],
+	words: post.words ?? 0,
+	minutes: post.minutes ?? 0,
+}));
+---
+
+<MainGridLayout
+  title={`${i18n(I18nKey.archive)} · ${workspace.site.title}`}
+  description={workspace.site.subtitle}
+  lang={workspace.site.lang}
+  workspaceSlug={slug}
+>
+  <ArchivePanel
+    client:load
+    sortedPosts={sortedPostsList}
+    workspaceSlug={slug}
+  />
+</MainGridLayout>
