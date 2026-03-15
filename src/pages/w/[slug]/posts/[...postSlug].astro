@@ -24,7 +24,7 @@ const postSlugStr = Array.isArray(postSlug) ? postSlug.join("/") : postSlug;
 
 const [workspace, entry] = await Promise.all([
 	getWorkspaceBySlug(workspaceSlug),
-	getPostBySlug(postSlugStr, workspaceSlug),
+	getPostBySlug(workspaceSlug, postSlugStr),
 ]);
 
 if (!workspace || !workspace.isPublic) {

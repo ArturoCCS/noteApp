@@ -97,3 +97,77 @@ Check out the [Contributing Guide](https://github.com/saicaca/fuwari/blob/main/C
 This project is licensed under the MIT License.
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsaicaca%2Ffuwari.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsaicaca%2Ffuwari?ref=badge_large&issueType=license)
+
+## 🔐 Multi-Workspace Architecture
+
+### Composite Post Document IDs
+
+Posts are stored in Firestore with a composite document ID:
+
+```
+posts/{workspaceSlug}__{slug}
+```
+
+For example, a post with slug `my-first-post` owned by workspace `arturo` is stored as:
+
+```
+posts/arturo__my-first-post
+```
+
+This guarantees **strict per-workspace isolation**: slugs can repeat across workspaces without conflict, and every read/write targets the correct workspace document directly without requiring a Firestore collection scan.
+
+Each post document includes the following required fields (in addition to content fields):
+
+| Field         | Type   | Description                                                   |
+|:--------------|:-------|:--------------------------------------------------------------|
+| `workspaceId` | string | The `workspaceSlug` of the owning workspace (e.g. `arturo`)   |
+| `ownerUid`    | string | Firebase Auth UID of the admin who created it                 |
+| `slug`        | string | Human-readable slug (without workspace prefix)                |
+
+### Required Firebase Custom Claims
+
+Each admin user must have the following [custom claims](https://firebase.google.com/docs/auth/admin/custom-claims) set on their Firebase Auth account:
+
+| Claim           | Type    | Description                                             |
+|:----------------|:--------|:--------------------------------------------------------|
+| `admin`         | boolean | Must be `true` to access any write API                  |
+| `workspaceSlug` | string  | Identifies the workspace this admin owns (e.g. `arturo`)|
+
+To set custom claims from a trusted server environment (e.g. Firebase Admin SDK):
+
+```js
+await getAuth().setCustomUserClaims(uid, {
+  admin: true,
+  workspaceSlug: "arturo",
+});
+```
+
+### Session Authentication
+
+The app uses **httpOnly cookies** for session management. After obtaining a Firebase ID token on the client, exchange it for a server-side session:
+
+```js
+await fetch("/api/auth/session", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ idToken }),
+});
+```
+
+This sets a `__session` cookie that is verified on every admin API call.
+
+### Public Post Links
+
+Once a workspace is marked `isPublic: true` in Firestore (`workspaces/{slug}`), its posts are accessible at:
+
+```
+/w/{workspaceSlug}/posts/{postSlug}
+```
+
+For example: `/w/arturo/posts/my-first-post`
+
+The workspace about page is at `/w/{workspaceSlug}/about`.
+
+### Migration Safety
+
+Posts created before composite IDs were introduced (without a `workspaceId` field) remain accessible via the legacy route `/posts/{slug}`. They are not deleted or modified. New posts created through the admin interface use composite IDs and appear exclusively under their workspace route.

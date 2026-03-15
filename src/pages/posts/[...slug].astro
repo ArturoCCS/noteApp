@@ -9,7 +9,7 @@ import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { Icon } from "astro-icon/components";
 import MarkdownIt from "markdown-it";
 import { licenseConfig } from "src/config";
-import { getPostBySlug } from "@/server/firebase/get-posts";
+import { getPostBySlugLegacy } from "@/server/firebase/get-posts";
 import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
 import { profileConfig, siteConfig } from "../../config";
@@ -27,7 +27,7 @@ const slug = Array.isArray(slugParam) ? slugParam.join("/") : slugParam;
 /* ------------------------------
    Obtener post desde Firestore
 -------------------------------- */
-const entry = slug ? await getPostBySlug(slug) : null;
+const entry = slug ? await getPostBySlugLegacy(slug) : null;
 
 if (!entry) {
 	return Astro.redirect("/404");
