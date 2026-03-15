@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+
+import CreatePost from "@/components/CreatePost";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { requireAdmin } from "@/server/firebase/auth";
+
+const auth = await requireAdmin(Astro.request);
+if (!auth.ok) return Astro.redirect("/admin/login");
+---
+
+<MainGridLayout title="Nuevo post" description="Crear post">
+  <CreatePost client:only="react" />
+</MainGridLayout>

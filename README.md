@@ -98,6 +98,34 @@ This project is licensed under the MIT License.
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsaicaca%2Ffuwari.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsaicaca%2Ffuwari?ref=badge_large&issueType=license)
 
+## 🗺️ Routing Overview
+
+### Admin flow (requires `admin: true` custom claim)
+
+| Route | Description |
+|:------|:------------|
+| `/admin/login` | Google sign-in page |
+| `/admin` | Workspace dashboard – lists all posts |
+| `/admin/new` | Create a new post |
+| `/admin/edit/:slug` | Edit an existing post |
+| `/admin/workspace` | Configure workspace settings |
+
+The root `/` always redirects: if a valid admin session cookie is present the browser is sent to `/admin`; otherwise to `/admin/login`.
+
+### Public flow (read-only, no login required)
+
+| Route | Description |
+|:------|:------------|
+| `/w/:workspaceSlug` | Public workspace home |
+| `/w/:workspaceSlug/about` | Workspace about page |
+| `/w/:workspaceSlug/posts/:slug` | Individual post |
+
+### Legacy `/posts/*` — disabled
+
+The old `/posts/:slug` route is **no longer active**. All requests to `/posts/*` are redirected to `/404`. Existing posts are still accessible through their workspace public URL (`/w/:workspaceSlug/posts/:slug`).
+
+---
+
 ## 🔐 Multi-Workspace Architecture
 
 ### Composite Post Document IDs

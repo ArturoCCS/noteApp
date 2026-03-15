@@ -252,7 +252,7 @@ export default function PostEditor({ post }: Props) {
 			<div className="flex justify-end gap-4 pt-6 pb-12">
 				<div className="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full onload-animation">
 					<a
-						href={`/posts/${post.slug}/`}
+						href="/admin"
 						className="w-full font-bold overflow-hidden active:scale-95"
 					>
 						<div className="btn-card rounded-2xl w-full h-[3.75rem] px-4 flex items-center justify-start gap-4">
