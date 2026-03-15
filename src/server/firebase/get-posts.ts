@@ -54,18 +54,13 @@ export async function getPostBySlug(slug: string, workspaceId?: string) {
 	try {
 		let query = db
 			.collection("posts")
-			.where("slug", "==", slug)
-			.limit(1) as FirebaseFirestore.Query;
+			.where("slug", "==", slug) as FirebaseFirestore.Query;
 
 		if (workspaceId) {
-			query = db
-				.collection("posts")
-				.where("slug", "==", slug)
-				.where("workspaceId", "==", workspaceId)
-				.limit(1);
+			query = query.where("workspaceId", "==", workspaceId);
 		}
 
-		const snapshot = await query.get();
+		const snapshot = await query.limit(1).get();
 
 		if (snapshot.empty) return null;
 
