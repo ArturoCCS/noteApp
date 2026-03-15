@@ -1,73 +1,62 @@
-import type { APIRoute } from "astro";
 import { db } from "@/server/firebase/admin";
 import { requireAdmin } from "@/server/firebase/auth";
+import type { APIRoute } from "astro";
 
 export const prerender = false;
 
+function postDocId(workspaceId: string, slug: string) {
+  return `${workspaceId}__${slug}`;
+}
+
 export const POST: APIRoute = async ({ request }) => {
-	try {
-		const admin = await requireAdmin(request);
-		const body = await request.json();
+  const auth = await requireAdmin(request);
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.error }), {
+      status: auth.status,
+    });
+  }
+  if (!auth.workspaceSlug) {
+    return new Response(
+      JSON.stringify({ error: "Missing workspaceSlug custom claim" }),
+      { status: 400 },
+    );
+  }
 
-		// Accept slug (preferred) or a raw document id for legacy compatibility
-		let docId: string;
-		if (body.slug) {
-			if (!admin.workspaceSlug) {
-				return new Response(
-					JSON.stringify({ error: "workspaceSlug claim no configurado" }),
-					{
-						status: 400,
-						headers: { "Content-Type": "application/json" },
-					},
-				);
-			}
-			docId = `${admin.workspaceSlug}__${body.slug}`;
-		} else if (body.id) {
-			docId = body.id;
-		} else {
-			return new Response(JSON.stringify({ error: "slug o id requerido" }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" },
-			});
-		}
+  try {
+    // Soportar legacy: { id } o nuevo: { slug }
+    const body = await request.json();
+    const slug = body.slug ?? body.id; // si tu UI manda id=slug todavía
+    if (!slug) {
+      return new Response(JSON.stringify({ error: "slug requerido" }), {
+        status: 400,
+      });
+    }
 
-		const ref = db.collection("posts").doc(docId);
-		const doc = await ref.get();
+    const workspaceId = auth.workspaceSlug;
+    const id = postDocId(workspaceId, String(slug).trim());
+    const ref = db.collection("posts").doc(id);
 
-		if (!doc.exists) {
-			return new Response(JSON.stringify({ error: "Post no encontrado" }), {
-				status: 404,
-				headers: { "Content-Type": "application/json" },
-			});
-		}
+    const snap = await ref.get();
+    if (!snap.exists) {
+      return new Response(JSON.stringify({ error: "Post no encontrado" }), {
+        status: 404,
+      });
+    }
 
-		// Verify ownership for posts that carry ownership metadata
-		const postData = doc.data() ?? {};
-		if (postData.ownerUid && postData.ownerUid !== admin.uid) {
-			return new Response(JSON.stringify({ error: "No autorizado" }), {
-				status: 403,
-				headers: { "Content-Type": "application/json" },
-			});
-		}
-		if (postData.workspaceId && postData.workspaceId !== admin.workspaceSlug) {
-			return new Response(JSON.stringify({ error: "No autorizado" }), {
-				status: 403,
-				headers: { "Content-Type": "application/json" },
-			});
-		}
+    const existing = snap.data() || {};
+    if (existing.workspaceId !== workspaceId || existing.ownerUid !== auth.uid) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+      });
+    }
 
-		await ref.delete();
+    await ref.delete();
 
-		return new Response(JSON.stringify({ ok: true }), {
-			status: 200,
-			headers: { "Content-Type": "application/json" },
-		});
-	} catch (err) {
-		if (err instanceof Response) return err;
-		console.error("Error al eliminar post:", err);
-		return new Response(JSON.stringify({ error: "Error interno" }), {
-			status: 500,
-			headers: { "Content-Type": "application/json" },
-		});
-	}
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  } catch (error) {
+    console.error("Error al eliminar post:", error);
+    return new Response(JSON.stringify({ error: "Error interno" }), {
+      status: 500,
+    });
+  }
 };

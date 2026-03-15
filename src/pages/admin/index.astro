@@ -1,0 +1,45 @@
+---
+export const prerender = false;
+
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { requireAdmin } from "@/server/firebase/auth";
+import { getSortedPosts } from "@/server/firebase/get-posts";
+
+const auth = await requireAdmin(Astro.request);
+if (!auth.ok) return Astro.redirect("/admin/login");
+if (!auth.workspaceSlug) throw new Error("Missing workspaceSlug claim");
+
+const posts = await getSortedPosts(auth.workspaceSlug);
+---
+
+<MainGridLayout title="Admin" description="Admin">
+  <div class="card-base p-6">
+    <div class="text-xs font-semibold uppercase tracking-widest opacity-70 mb-3">
+      Workspace: {auth.workspaceSlug}
+    </div>
+
+    <div class="flex justify-between items-center mb-5">
+      <h1 class="text-2xl font-bold">Tus posts</h1>
+      <a class="btn-regular btn-plain px-6 h-10 rounded-[var(--radius-large)]" href="/admin/new">
+        Nuevo
+      </a>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      {posts.map((p) => (
+        <div class="btn-plain btn-regular px-4 py-3 rounded-xl flex justify-between items-center">
+          <a class="font-semibold" href={`/admin/edit/${p.slug}`}>
+            {p.title}
+          </a>
+          <a class="text-xs opacity-70" target="_blank" href={`/w/${auth.workspaceSlug}/posts/${p.slug}`}>
+            Ver público
+          </a>
+        </div>
+      ))}
+    </div>
+
+    <div class="mt-6">
+      <a class="link text-[var(--primary)]" href="/admin/workspace">Configurar entorno</a>
+    </div>
+  </div>
+</MainGridLayout>

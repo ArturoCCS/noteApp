@@ -1,0 +1,11 @@
+---
+export const prerender = false;
+import AdminLogin from "@/components/AdminLogin";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+---
+
+<MainGridLayout title="Admin Login" description="Login">
+  <div class="card-base p-6 max-w-[520px] mx-auto">
+    <AdminLogin client:only="react" />
+  </div>
+</MainGridLayout>

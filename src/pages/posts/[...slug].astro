@@ -15,9 +15,12 @@ import PostMetadata from "../../components/PostMeta.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
 
-export const prerender = false;
-const isAdmin = true;
+import { requireAdmin } from "@/server/firebase/auth";
 
+const auth = await requireAdmin(Astro.request);
+const isAdmin = auth.ok;
+
+export const prerender = false;
 /* ------------------------------
    Obtener slug dinámico
 -------------------------------- */
@@ -126,9 +129,9 @@ const isStudy = entry.type === "study";
 
         {isAdmin && (
           <>
-            <button
+           <button
               id="delete-post-btn"
-              data-id={entry.id}
+              data-slug={entry.slug}
               class="flex items-center justify-center h-8 w-8 rounded-md
                 bg-red-600/30 hover:bg-red-500/60
                 text-black/40 dark:text-white/50 transition"
@@ -234,14 +237,16 @@ const isStudy = entry.type === "study";
       }
 
       window.openConfirmDialog(async () => {
-        const id = (btn as HTMLElement).dataset.id;
-        if (!id) return;
+        const slug = (btn as HTMLElement).dataset.slug;
+        if (!slug) return;
+
 
         try {
+
           const response = await fetch("/api/delete-post/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id }),
+            body: JSON.stringify({ slug }),
           });
 
           if (response.ok) {

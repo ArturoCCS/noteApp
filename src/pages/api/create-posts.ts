@@ -1,75 +1,79 @@
-import type { APIRoute } from "astro";
-import { Timestamp } from "firebase-admin/firestore";
 import { db } from "@/server/firebase/admin";
 import { requireAdmin } from "@/server/firebase/auth";
+import type { APIRoute } from "astro";
+import { Timestamp } from "firebase-admin/firestore";
 
 export const prerender = false;
 
+function postDocId(workspaceId: string, slug: string) {
+  return `${workspaceId}__${slug}`;
+}
+
 export const POST: APIRoute = async ({ request }) => {
-	try {
-		const admin = await requireAdmin(request);
+  const auth = await requireAdmin(request);
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.error }), {
+      status: auth.status,
+    });
+  }
+  if (!auth.workspaceSlug) {
+    return new Response(
+      JSON.stringify({ error: "Missing workspaceSlug custom claim" }),
+      { status: 400 },
+    );
+  }
 
-		if (!admin.workspaceSlug) {
-			return new Response(
-				JSON.stringify({ error: "workspaceSlug claim no configurado" }),
-				{ status: 400, headers: { "Content-Type": "application/json" } },
-			);
-		}
+  try {
+    const data = await request.json();
 
-		const data = await request.json();
+    // ✅ validación mínima
+    if (!data.title || !data.slug || !data.content || !data.type) {
+      return new Response(JSON.stringify({ error: "Datos incompletos" }), {
+        status: 400,
+      });
+    }
 
-		if (!data.title || !data.slug || !data.content || !data.type) {
-			return new Response(JSON.stringify({ error: "Datos incompletos" }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" },
-			});
-		}
+    const workspaceId = auth.workspaceSlug;
+    const slug = String(data.slug).trim();
+    const id = postDocId(workspaceId, slug);
 
-		// Composite document id: workspaceSlug__slug
-		const docId = `${admin.workspaceSlug}__${data.slug}`;
-		const ref = db.collection("posts").doc(docId);
+    const ref = db.collection("posts").doc(id);
+    const now = Timestamp.now();
 
-		const now = Timestamp.now();
+    await ref.set({
+      id,
+      workspaceId,
+      ownerUid: auth.uid,
 
-		await ref.set({
-			title: data.title,
-			slug: data.slug,
-			description: data.description || "",
-			image: data.image ?? null,
-			tags: Array.isArray(data.tags) ? data.tags : [],
-			category: data.category ?? null,
-			content: data.content,
+      title: data.title,
+      slug,
+      description: data.description || "",
+      image: data.image ?? null,
+      tags: Array.isArray(data.tags) ? data.tags : [],
+      category: data.category ?? null,
+      content: data.content,
 
-			// Derived from the verified session — never trusted from the client
-			workspaceId: admin.workspaceSlug,
-			ownerUid: admin.uid,
+      type: data.type, // "study" | "task" | "blog"
+      status: data.type === "task" ? data.status ?? "pending" : "published",
 
-			type: data.type, // "study" | "task" | "blog"
+      published: data.published
+        ? Timestamp.fromDate(new Date(data.published))
+        : now,
 
-			status: data.type === "task" ? (data.status ?? "pending") : "published",
+      words: Number(data.words) || 0,
+      minutes: Number(data.minutes) || 1,
 
-			published: data.published
-				? Timestamp.fromDate(new Date(data.published))
-				: now,
+      createdAt: now,
+      updatedAt: now,
+    });
 
-			words: Number(data.words) || 0,
-			minutes: Number(data.minutes) || 1,
-
-			createdAt: now,
-			updatedAt: now,
-		});
-
-		return new Response(
-			JSON.stringify({ ok: true, slug: data.slug, id: docId }),
-			{ status: 201, headers: { "Content-Type": "application/json" } },
-		);
-	} catch (err) {
-		if (err instanceof Response) return err;
-		console.error("❌ Error al guardar post:", err);
-
-		return new Response(JSON.stringify({ error: "Error interno" }), {
-			status: 500,
-			headers: { "Content-Type": "application/json" },
-		});
-	}
+    return new Response(JSON.stringify({ ok: true, slug, id, workspaceId }), {
+      status: 201,
+    });
+  } catch (error) {
+    console.error("❌ Error al guardar post:", error);
+    return new Response(JSON.stringify({ error: "Error interno" }), {
+      status: 500,
+    });
+  }
 };
