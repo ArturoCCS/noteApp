@@ -1,20 +1,20 @@
 ---
-import { getPostById } from "@/server/firebase/get-posts";
 import PostEditor from "@components/PostEditor";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getPostById } from "@/server/firebase/get-posts";
 
 export const prerender = false;
 
 const { slug } = Astro.params;
 
 if (!slug) {
-  throw new Error("Slug no proporcionado");
+	throw new Error("Slug no proporcionado");
 }
 
 const post = await getPostById(slug);
 
 if (!post) {
-  throw new Error("Post no encontrado");
+	throw new Error("Post no encontrado");
 }
 ---
 <MainGridLayout>

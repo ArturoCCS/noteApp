@@ -54,18 +54,16 @@ export const navBarConfig: NavBarConfig = {
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "https://i.pinimg.com/736x/e3/73/80/e373805ebd05078bdf57f02b7353a514.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
+	avatar:
+		"https://i.pinimg.com/736x/e3/73/80/e373805ebd05078bdf57f02b7353a514.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
 	name: "",
 	bio: "",
 	links: [
-	
-
 		// {
 		// 	name: "GitHub",
 		// 	icon: "fa6-brands:github",
 		// 	url: "https://github.com/ArturoCCS",
 		// },
-		
 	],
 };
 

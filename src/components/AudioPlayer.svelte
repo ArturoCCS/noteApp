@@ -1,49 +1,48 @@
 <script lang="ts">
-	import Icon from "@iconify/svelte";
-	import { onMount } from "svelte";
+import Icon from "@iconify/svelte";
+import { onMount } from "svelte";
 
-	const playlist = [
-		"/music/music1.mp3",
-		"/music/music2.mp3",
-	];
+const playlist = ["/music/music1.mp3", "/music/music2.mp3"];
 
-	let audio: HTMLAudioElement;
-	let isPlaying = $state(false);
-	let volume = $state(0.3);
-	let currentTrack = $state(0);
+let audio: HTMLAudioElement;
+let isPlaying = $state(false);
+let volume = $state(0.3);
+let currentTrack = $state(0);
 
-	onMount(() => {
-		audio.volume = volume;
-	});
+onMount(() => {
+	audio.volume = volume;
+});
 
-	function togglePlay() {
-		if (isPlaying) {
-			audio.pause();
-		} else {
-			audio.play();
-		}
-		isPlaying = !isPlaying;
-	}
-
-	function handleVolume(e: Event) {
-		const target = e.target as HTMLInputElement;
-		volume = parseFloat(target.value);
-		audio.volume = volume;
-	}
-
-	function onTrackEnd() {
-		currentTrack = (currentTrack + 1) % playlist.length;
-		audio.src = playlist[currentTrack];
+function togglePlay() {
+	if (isPlaying) {
+		audio.pause();
+	} else {
 		audio.play();
 	}
+	isPlaying = !isPlaying;
+}
 
-	function showPanel() {
-		document.querySelector("#audio-panel")?.classList.remove("float-panel-closed");
-	}
+function handleVolume(e: Event) {
+	const target = e.target as HTMLInputElement;
+	volume = Number.parseFloat(target.value);
+	audio.volume = volume;
+}
 
-	function hidePanel() {
-		document.querySelector("#audio-panel")?.classList.add("float-panel-closed");
-	}
+function onTrackEnd() {
+	currentTrack = (currentTrack + 1) % playlist.length;
+	audio.src = playlist[currentTrack];
+	audio.play();
+}
+
+function showPanel() {
+	document
+		.querySelector("#audio-panel")
+		?.classList.remove("float-panel-closed");
+}
+
+function hidePanel() {
+	document.querySelector("#audio-panel")?.classList.add("float-panel-closed");
+}
 </script>
 
 <div class="relative z-50" role="menu" tabindex="-1" onmouseleave={hidePanel}>

@@ -1,7 +1,7 @@
 ---
-import { getPostBySlug } from "@/server/firebase/get-posts";
 import License from "@components/misc/License.astro";
 import Markdown from "@components/misc/Markdown.astro";
+import StudyTools from "@components/study/StudyTools";
 import ConfirmDialog from "@components/ui/ConfirmDialog.astro";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
@@ -9,11 +9,11 @@ import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { Icon } from "astro-icon/components";
 import MarkdownIt from "markdown-it";
 import { licenseConfig } from "src/config";
+import { getPostBySlug } from "@/server/firebase/get-posts";
 import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
-import StudyTools from "@components/study/StudyTools";
 
 export const prerender = false;
 const isAdmin = true;
@@ -30,15 +30,15 @@ const slug = Array.isArray(slugParam) ? slugParam.join("/") : slugParam;
 const entry = slug ? await getPostBySlug(slug) : null;
 
 if (!entry) {
-  return Astro.redirect("/404");
+	return Astro.redirect("/404");
 }
 
 /* ------------------------------
    Markdown
 -------------------------------- */
 const md = new MarkdownIt({
-  breaks: false,
-  html: true,
+	breaks: false,
+	html: true,
 });
 const htmlContent = md.render(entry.content ?? "");
 
@@ -50,18 +50,18 @@ const updatedDate = entry.updated ? new Date(entry.updated) : undefined;
 const defaultLang = siteConfig.lang.replace("_", "-");
 
 const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  headline: entry.title,
-  description: entry.description || entry.title,
-  keywords: entry.tags,
-  author: {
-    "@type": "Person",
-    name: profileConfig.name,
-    url: Astro.site,
-  },
-  datePublished: formatDateToYYYYMMDD(publishedDate),
-  inLanguage: defaultLang,
+	"@context": "https://schema.org",
+	"@type": "BlogPosting",
+	headline: entry.title,
+	description: entry.description || entry.title,
+	keywords: entry.tags,
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+		url: Astro.site,
+	},
+	datePublished: formatDateToYYYYMMDD(publishedDate),
+	inLanguage: defaultLang,
 };
 
 const isStudy = entry.type === "study";
