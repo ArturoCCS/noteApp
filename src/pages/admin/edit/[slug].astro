@@ -1,0 +1,28 @@
+---
+export const prerender = false;
+
+import PostEditor from "@/components/PostEditor";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { requireAdmin } from "@/server/firebase/auth";
+import { getPostBySlug } from "@/server/firebase/get-posts";
+
+const auth = await requireAdmin(Astro.request);
+if (!auth.ok) return Astro.redirect("/admin/login");
+if (!auth.workspaceSlug) throw new Error("Missing workspaceSlug claim");
+
+const { slug } = Astro.params as { slug: string };
+
+if (!slug) {
+  return Astro.redirect("/admin");
+}
+
+const post = await getPostBySlug(auth.workspaceSlug, slug);
+
+if (!post) {
+  return Astro.redirect("/admin");
+}
+---
+
+<MainGridLayout title={`Editar · ${post.title}`} description="Editar post">
+  <PostEditor client:only="react" post={post} />
+</MainGridLayout>

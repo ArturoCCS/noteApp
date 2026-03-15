@@ -32,3 +32,14 @@ export async function requireAdmin(request: Request) {
     return { ok: false as const, status: 401, error: "Invalid session" };
   }
 }
+
+/**
+ * Non-throwing version of requireAdmin. Returns the admin user info
+ * (uid + workspaceSlug) if the session cookie is valid and has admin claim,
+ * or null otherwise.  Useful for pages that want optional admin context.
+ */
+export async function getAdminUser(request: Request) {
+	const result = await requireAdmin(request);
+	if (!result.ok) return null;
+	return { uid: result.uid, workspaceSlug: result.workspaceSlug };
+}

@@ -168,6 +168,40 @@ For example: `/w/arturo/posts/my-first-post`
 
 The workspace about page is at `/w/{workspaceSlug}/about`.
 
+### Navigation
+
+| Route | Description |
+|:------|:------------|
+| `/` | Redirects to `/admin` (if logged in) or `/admin/login` |
+| `/admin/login` | Google sign-in page for admins |
+| `/admin` | Admin dashboard — lists the admin's own posts |
+| `/admin/new` | Create a new post (admin only) |
+| `/admin/edit/:slug` | Edit an existing post (admin only) |
+| `/admin/workspace` | Configure workspace settings, profile, and about page |
+| `/w/:slug` | Public read-only view of a workspace's posts |
+| `/w/:slug/posts/:postSlug` | Public read-only view of an individual post |
+| `/w/:slug/about` | Public about page for a workspace |
+
+> **Legacy routes disabled:** `/posts/:slug` now redirects to `/404`. All posts are served exclusively under `/w/:workspaceSlug/posts/:postSlug`.
+
 ### Migration Safety
 
-Posts created before composite IDs were introduced (without a `workspaceId` field) remain accessible via the legacy route `/posts/{slug}`. They are not deleted or modified. New posts created through the admin interface use composite IDs and appear exclusively under their workspace route.
+Posts created before composite IDs were introduced (without a `workspaceId` field) are no longer accessible via the old `/posts/{slug}` route (which now redirects to `/404`). New posts created through the admin interface use composite IDs (`workspaceSlug__slug`) and are served exclusively under their workspace route.
+
+To migrate legacy posts, update each post document in Firestore to add the following fields:
+
+```js
+// Example: migrate a legacy post with slug "my-first-post" to workspace "arturo"
+await firestore
+  .collection("posts")
+  .doc("arturo__my-first-post")  // new composite ID
+  .set({
+    ...existingPostData,
+    workspaceId: "arturo",
+    ownerUid: "<admin-uid>",
+    slug: "my-first-post",
+  });
+// Then delete the old document: firestore.collection("posts").doc("my-first-post").delete()
+```
+
+After migration the post will be accessible at `/w/arturo/posts/my-first-post`.
