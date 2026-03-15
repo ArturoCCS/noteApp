@@ -1,6 +1,7 @@
 ---
 import PostEditor from "@components/PostEditor";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getAdminUser } from "@/server/firebase/auth";
 import { getPostById } from "@/server/firebase/get-posts";
 
 export const prerender = false;
@@ -11,7 +12,18 @@ if (!slug) {
 	throw new Error("Slug no proporcionado");
 }
 
-const post = await getPostById(slug);
+// Try to resolve the composite id using the admin session first (new posts)
+let post = null;
+const admin = await getAdminUser(Astro.request);
+if (admin?.workspaceSlug) {
+	const compositeId = `${admin.workspaceSlug}__${slug}`;
+	post = await getPostById(compositeId);
+}
+
+// Fall back to a direct id lookup (legacy posts or composite id passed directly)
+if (!post) {
+	post = await getPostById(slug);
+}
 
 if (!post) {
 	throw new Error("Post no encontrado");

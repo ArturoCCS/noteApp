@@ -49,18 +49,27 @@ export async function getPostById(id: string) {
 	}
 }
 
-/* ✅ ESTA ES LA PIEZA QUE FALTABA */
-export async function getPostBySlug(slug: string, workspaceId?: string) {
+/**
+ * Fetch a workspace-scoped post by composite document id (`${workspaceId}__${slug}`).
+ * Workspace public routes should use this function.
+ */
+export async function getPostBySlug(workspaceId: string, slug: string) {
+	const docId = `${workspaceId}__${slug}`;
+	return getPostById(docId);
+}
+
+/**
+ * Fetch a post by slug using a Firestore query (legacy / non-workspace routes).
+ * Used by `/posts/[...slug]` to keep backward compatibility with posts
+ * that were created before composite document ids were introduced.
+ */
+export async function getPostBySlugLegacy(slug: string) {
 	try {
-		let query = db
+		const snapshot = await db
 			.collection("posts")
-			.where("slug", "==", slug) as FirebaseFirestore.Query;
-
-		if (workspaceId) {
-			query = query.where("workspaceId", "==", workspaceId);
-		}
-
-		const snapshot = await query.limit(1).get();
+			.where("slug", "==", slug)
+			.limit(1)
+			.get();
 
 		if (snapshot.empty) return null;
 
