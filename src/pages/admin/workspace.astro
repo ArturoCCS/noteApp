@@ -1,0 +1,87 @@
+---
+export const prerender = false;
+
+import WorkspaceSettingsEditor from "@components/WorkspaceSettingsEditor";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getAdminUser } from "@/server/firebase/auth";
+import { getWorkspaceBySlug } from "@/server/firebase/get-workspace";
+
+const admin = await getAdminUser(Astro.request);
+
+if (!admin) {
+	return Astro.redirect("/");
+}
+
+const workspace = admin.workspaceSlug
+	? await getWorkspaceBySlug(admin.workspaceSlug)
+	: null;
+---
+
+<MainGridLayout title="Configuración del Workspace">
+  <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4 onload-animation">
+    <div class="card-base z-10 px-6 md:px-9 pt-6 pb-6 relative w-full">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="h-8 w-8 rounded-lg bg-[var(--primary)]/20 flex items-center justify-center">
+          <span class="text-[var(--primary)] text-lg">⚙</span>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-black/90 dark:text-white/90">Configuración del Workspace</h1>
+          {admin.workspaceSlug && (
+            <p class="text-sm text-black/40 dark:text-white/40">@{admin.workspaceSlug}</p>
+          )}
+        </div>
+      </div>
+
+      {!admin.workspaceSlug && (
+        <div class="rounded-xl bg-yellow-500/10 border border-yellow-500/20 px-4 py-3 text-sm text-yellow-600 dark:text-yellow-400 mb-4">
+          Tu cuenta no tiene asignado un workspace. Contacta al administrador para que configure el custom claim <code class="font-mono bg-yellow-500/10 px-1 rounded">workspaceSlug</code>.
+        </div>
+      )}
+
+      {!workspace && admin.workspaceSlug && (
+        <div class="rounded-xl bg-blue-500/10 border border-blue-500/20 px-4 py-3 text-sm text-blue-600 dark:text-blue-400 mb-4 flex flex-col gap-2">
+          <p>El workspace <strong>@{admin.workspaceSlug}</strong> no existe todavía.</p>
+          <button
+            id="bootstrap-btn"
+            class="btn-plain px-4 h-9 rounded-lg text-sm w-fit font-medium"
+          >
+            Crear workspace con valores por defecto
+          </button>
+        </div>
+      )}
+
+      {workspace && (
+        <WorkspaceSettingsEditor
+          client:only="react"
+          initialConfig={workspace}
+          workspaceSlug={admin.workspaceSlug}
+        />
+      )}
+    </div>
+  </div>
+</MainGridLayout>
+
+<script>
+  const btn = document.getElementById("bootstrap-btn");
+  if (btn) {
+    btn.addEventListener("click", async () => {
+      btn.textContent = "Creando…";
+      (btn as HTMLButtonElement).disabled = true;
+      try {
+        const res = await fetch("/api/workspace/bootstrap/", { method: "POST" });
+        if (res.ok) {
+          window.location.reload();
+        } else {
+          const { error } = await res.json();
+          alert("Error: " + error);
+          btn.textContent = "Crear workspace con valores por defecto";
+          (btn as HTMLButtonElement).disabled = false;
+        }
+      } catch (e) {
+        alert("Error de red");
+        btn.textContent = "Crear workspace con valores por defecto";
+        (btn as HTMLButtonElement).disabled = false;
+      }
+    });
+  }
+</script>

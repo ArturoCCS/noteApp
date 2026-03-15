@@ -30,16 +30,18 @@ const page: Page<Post> = {
 	lastPage,
 	total,
 	url: {
-current: Astro.url.pathname,
-next: currentPage < lastPage
-? `${Astro.url.pathname}?page=${currentPage + 1}`
-: undefined,
-prev: currentPage > 1
-? `${Astro.url.pathname}?page=${currentPage - 1}`
-: undefined,
-first: undefined,
-last: undefined
-},
+		current: Astro.url.pathname,
+		next:
+			currentPage < lastPage
+				? `${Astro.url.pathname}?page=${currentPage + 1}`
+				: undefined,
+		prev:
+			currentPage > 1
+				? `${Astro.url.pathname}?page=${currentPage - 1}`
+				: undefined,
+		first: undefined,
+		last: undefined,
+	},
 };
 ---
 <MainGridLayout>

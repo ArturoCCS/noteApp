@@ -1,18 +1,18 @@
 <script context="module" lang="ts">
-	export interface Post {
-		id: string;
-		slug: string;
-		title: string;
-		description?: string;
-		content?: string;
-		image?: string;
-		tags: string[];
-		category?: string | null;
-		published: string;
-		updated?: string;
-		words: number;
-		minutes: number;
-	}
+export interface Post {
+	id: string;
+	slug: string;
+	title: string;
+	description?: string;
+	content?: string;
+	image?: string;
+	tags: string[];
+	category?: string | null;
+	published: string;
+	updated?: string;
+	words: number;
+	minutes: number;
+}
 </script>
 
 <script lang="ts">
