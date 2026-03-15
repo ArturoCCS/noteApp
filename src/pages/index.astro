@@ -1,0 +1,10 @@
+---
+export const prerender = false;
+
+import { requireAdmin } from "@/server/firebase/auth";
+
+const auth = await requireAdmin(Astro.request);
+
+if (auth.ok) return Astro.redirect("/admin/");
+return Astro.redirect("/admin/login/");
+---

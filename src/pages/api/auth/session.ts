@@ -12,7 +12,6 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   try {
-    // 5 días
     const expiresIn = 5 * 24 * 60 * 60 * 1000;
     const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
 
@@ -25,7 +24,8 @@ export const POST: APIRoute = async ({ request }) => {
     );
 
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
-  } catch {
+  } catch (e) {
+    console.error("createSessionCookie error:", e);
     return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
   }
 };

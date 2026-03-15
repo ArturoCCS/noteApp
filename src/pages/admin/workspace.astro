@@ -6,7 +6,7 @@ import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import { requireAdmin } from "@/server/firebase/auth";
 
 const auth = await requireAdmin(Astro.request);
-if (!auth.ok) return Astro.redirect("/admin/login");
+if (!auth.ok) return Astro.redirect("/admin/login/");
 ---
 
 <MainGridLayout title="Workspace" description="Workspace">

@@ -6,7 +6,7 @@ import { requireAdmin } from "@/server/firebase/auth";
 import { getSortedPosts } from "@/server/firebase/get-posts";
 
 const auth = await requireAdmin(Astro.request);
-if (!auth.ok) return Astro.redirect("/admin/login");
+if (!auth.ok) return Astro.redirect("/admin/login/");
 if (!auth.workspaceSlug) throw new Error("Missing workspaceSlug claim");
 
 const posts = await getSortedPosts(auth.workspaceSlug);
@@ -20,7 +20,7 @@ const posts = await getSortedPosts(auth.workspaceSlug);
 
     <div class="flex justify-between items-center mb-5">
       <h1 class="text-2xl font-bold">Tus posts</h1>
-      <a class="btn-regular btn-plain px-6 h-10 rounded-[var(--radius-large)]" href="/admin/new">
+      <a class="btn-regular btn-plain px-6 h-10 rounded-[var(--radius-large)]" href="/admin/new/">
         Nuevo
       </a>
     </div>
@@ -39,7 +39,7 @@ const posts = await getSortedPosts(auth.workspaceSlug);
     </div>
 
     <div class="mt-6">
-      <a class="link text-[var(--primary)]" href="/admin/workspace">Configurar entorno</a>
+      <a class="link text-[var(--primary)]" href="/admin/workspace/">Configurar entorno</a>
     </div>
   </div>
 </MainGridLayout>
