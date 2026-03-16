@@ -1,10 +1,12 @@
 ---
 export const prerender = false;
 
+import AboutInlineEditor from "@components/AboutContentToggle";
 import Markdown from "@components/misc/Markdown.astro";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { Icon } from "astro-icon/components";
 import MarkdownIt from "markdown-it";
+import { requireAdmin } from "@/server/firebase/auth";
 import { getWorkspaceBySlug } from "@/server/firebase/get-workspace";
 
 const { slug } = Astro.params as { slug: string };
@@ -19,6 +21,10 @@ const aboutContent = workspace.pages?.about ?? "";
 
 const md = new MarkdownIt({ html: true, linkify: true, typographer: true });
 const htmlContent = md.render(aboutContent);
+
+// Check if the current user is the admin of this workspace
+const authResult = await requireAdmin(Astro.request);
+const isAdmin = authResult.ok && authResult.workspaceSlug === slug;
 ---
 
 <MainGridLayout
@@ -44,6 +50,13 @@ const htmlContent = md.render(aboutContent);
           : <p class="text-black/40 dark:text-white/40 italic">Este workspace aún no tiene una página de presentación.</p>
         }
       </Markdown>
+
+      {isAdmin && (
+        <AboutInlineEditor
+          client:only="react"
+          initialContent={aboutContent}
+        />
+      )}
     </div>
   </div>
 

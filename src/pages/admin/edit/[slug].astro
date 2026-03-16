@@ -18,6 +18,6 @@ if (!post) return Astro.redirect("/admin/");
 ---
 <MainGridLayout title="Editar post" description="Editar post">
   <div class="card-base p-6">
-    <PostEditor client:only="react" post={post} />
+    <PostEditor client:only="react" post={post} workspaceSlug={auth.workspaceSlug} />
   </div>
 </MainGridLayout>
