@@ -8,7 +8,7 @@ import { requireAdmin } from "@/server/firebase/auth";
 const auth = await requireAdmin(Astro.request);
 if (!auth.ok) return Astro.redirect("/admin/login/");
 ---
-<MainGridLayout title="Nuevo post" description="Nuevo post">
+<MainGridLayout title="Nuevo post" description="Nuevo post" workspaceSlug={auth.workspaceSlug ?? undefined}>
   <div class="card-base p-6">
     <CreatePost client:only="react" />
   </div>

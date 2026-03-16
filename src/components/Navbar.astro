@@ -39,7 +39,7 @@ let links: NavBarLink[] = navBarConfig.links.map(
             </div>
         </a>
         {workspaceSlug && (
-            <a href={`/w/${workspaceSlug}/`} class="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)]/20 transition ml-1" aria-label={`Workspace ${workspaceSlug}`}>
+            <a href={`/admin/`} class="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)]/20 transition ml-1" aria-label={`Workspace ${workspaceSlug}`}>
                 <Icon name="material-symbols:workspaces-outline" class="text-sm" />
                 <span>@{workspaceSlug}</span>
             </a>

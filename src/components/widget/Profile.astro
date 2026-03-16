@@ -10,7 +10,7 @@ interface Props {
 
 const config = profileConfig;
 const { workspaceSlug } = Astro.props;
-const aboutUrl = workspaceSlug ? `/w/${workspaceSlug}/about/` : url("/about/");
+const aboutUrl = workspaceSlug ? "/admin/about/" : url("/about/");
 ---
 <div class="card-base p-3">
     <a aria-label="Go to About Page" href={aboutUrl}

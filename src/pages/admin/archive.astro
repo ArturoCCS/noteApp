@@ -16,7 +16,7 @@ const allPosts = (await getSortedPosts(auth.workspaceSlug)).map((post) => ({
 }));
 ---
 
-<MainGridLayout title="Archivo" description="Todos los posts del workspace">
+<MainGridLayout title="Archivo" description="Todos los posts del workspace" workspaceSlug={auth.workspaceSlug}>
   <div class="card-base p-6">
     <div class="flex justify-between items-center mb-5">
       <h1 class="text-2xl font-bold">Archivo</h1>

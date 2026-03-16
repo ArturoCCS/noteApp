@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { requireAdmin } from "@/server/firebase/auth";
+import { getWorkspaceAbout } from "@/server/firebase/get-workspace";
 import { getWorkspaceBySlug } from "@/server/firebase/workspaces";
 
 export const prerender = false;
@@ -17,8 +18,22 @@ export const GET: APIRoute = async ({ request }) => {
 		);
 	}
 
-	const ws = await getWorkspaceBySlug(auth.workspaceSlug);
-	return new Response(JSON.stringify({ ok: true, workspace: ws }), {
+	const [ws, aboutContent] = await Promise.all([
+		getWorkspaceBySlug(auth.workspaceSlug),
+		getWorkspaceAbout(auth.workspaceSlug),
+	]);
+
+	const existingPages =
+		(ws as { pages?: Record<string, unknown> })?.pages ?? {};
+	const wsWithAbout = {
+		...(ws ?? {}),
+		pages: {
+			...existingPages,
+			about: { content: aboutContent },
+		},
+	};
+
+	return new Response(JSON.stringify({ ok: true, workspace: wsWithAbout }), {
 		status: 200,
 	});
 };

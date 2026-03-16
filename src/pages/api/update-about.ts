@@ -31,9 +31,11 @@ export const POST: APIRoute = async ({ request }) => {
 		await db
 			.collection("workspaces")
 			.doc(auth.workspaceSlug)
+			.collection("pages")
+			.doc("about")
 			.set(
 				{
-					pages: { about: String(content) },
+					content: String(content),
 					updatedAt: Timestamp.now(),
 				},
 				{ merge: true },

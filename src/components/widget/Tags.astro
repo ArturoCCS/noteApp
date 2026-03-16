@@ -22,8 +22,8 @@ const COLLAPSED_HEIGHT = "7.5rem";
 const isCollapsed = tags.length >= 20;
 
 function getWorkspaceTagUrl(tag: string, wsSlug?: string): string {
-	if (!tag) return wsSlug ? `/w/${wsSlug}/archive/` : "/archive/";
-	const base = wsSlug ? `/w/${wsSlug}/archive` : "/archive";
+	if (!tag) return wsSlug ? "/admin/archive/" : "/archive/";
+	const base = wsSlug ? "/admin/archive" : "/archive";
 	return `${base}/?tag=${encodeURIComponent(tag.trim())}`;
 }
 ---
