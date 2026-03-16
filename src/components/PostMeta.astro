@@ -13,6 +13,7 @@ interface Props {
 	category?: string | null;
 	hideTagsForMobile?: boolean;
 	hideUpdateDate?: boolean;
+	workspaceSlug?: string;
 }
 
 const {
@@ -22,9 +23,35 @@ const {
 	category = null,
 	hideTagsForMobile = false,
 	hideUpdateDate = false,
+	workspaceSlug,
 } = Astro.props;
 
 const className = Astro.props.class;
+
+// When inside a workspace, links must point to workspace-scoped archive routes.
+const resolvedCategoryUrl = (cat: string | null): string => {
+	if (workspaceSlug) {
+		const archiveBase = `/w/${workspaceSlug}/archive/`;
+		const trimmed = cat?.trim() ?? "";
+		if (
+			!trimmed ||
+			trimmed.toLowerCase() === i18n(I18nKey.uncategorized).toLowerCase()
+		) {
+			return `${archiveBase}?uncategorized=true`;
+		}
+		return `${archiveBase}?category=${encodeURIComponent(trimmed)}`;
+	}
+	return getCategoryUrl(cat);
+};
+
+const resolvedTagUrl = (tag: string): string => {
+	if (workspaceSlug) {
+		const archiveBase = `/w/${workspaceSlug}/archive/`;
+		if (!tag) return archiveBase;
+		return `${archiveBase}?tag=${encodeURIComponent(tag.trim())}`;
+	}
+	return getTagUrl(tag);
+};
 ---
 
 <div
@@ -66,7 +93,7 @@ const className = Astro.props.class;
       class="text-xl"
     />
     <a
-      href={category ? getCategoryUrl(category) : "#"}
+      href={resolvedCategoryUrl(category)}
       aria-label={`View all posts in the ${category ?? "uncategorized"} category`}
       class="transition text-sm font-medium whitespace-nowrap
              hover:text-[var(--primary)] dark:hover:text-[var(--primary)]"
@@ -96,7 +123,7 @@ const className = Astro.props.class;
             ) : null}
 
             <a
-              href={getTagUrl(tag)}
+              href={resolvedTagUrl(tag)}
               aria-label={`View all posts with the ${tag} tag`}
               class="transition text-sm font-medium whitespace-nowrap
                      hover:text-[var(--primary)] dark:hover:text-[var(--primary)]"

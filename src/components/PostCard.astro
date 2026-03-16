@@ -5,7 +5,7 @@ import { i18n } from "../i18n/translation";
 import ImageWrapper from "./misc/ImageWrapper.astro";
 import PostMetadata from "./PostMeta.astro";
 
-const { post, style, class: className, postUrl: postUrlProp } = Astro.props;
+const { post, style, class: className, postUrl: postUrlProp, workspaceSlug } = Astro.props;
 
 const title = post.title;
 
@@ -48,7 +48,8 @@ const coverWidth = "28%";
             category={category} 
             hideTagsForMobile={true} 
             hideUpdateDate={true} 
-            class="mb-4" 
+            class="mb-4"
+            workspaceSlug={workspaceSlug}
         />
 
         <div class:list={["transition text-75 mb-3.5 pr-4 line-clamp-2 md:line-clamp-1"]}>

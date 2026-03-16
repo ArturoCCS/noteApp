@@ -13,6 +13,7 @@ const interval = 50;
     <PostCard
       post={post}
       postUrl={workspaceSlug ? `/w/${workspaceSlug}/posts/${post.slug}/` : undefined}
+      workspaceSlug={workspaceSlug}
       class:list="onload-animation"
       style={`animation-delay: calc(var(--content-delay) + ${delay++ * interval}ms)`}
     />

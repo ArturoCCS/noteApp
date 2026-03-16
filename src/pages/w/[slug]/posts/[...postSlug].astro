@@ -3,6 +3,7 @@ export const prerender = false;
 
 import License from "@components/misc/License.astro";
 import Markdown from "@components/misc/Markdown.astro";
+import ImageWrapper from "@components/misc/ImageWrapper.astro";
 import PostMetadata from "@components/PostMeta.astro";
 import StudyTools from "@components/study/StudyTools";
 import I18nKey from "@i18n/i18nKey";
@@ -20,7 +21,15 @@ const { slug, postSlug } = Astro.params as {
 };
 
 const workspaceSlug = slug;
-const postSlugStr = Array.isArray(postSlug) ? postSlug.join("/") : postSlug;
+// Normalize the slug: join rest-param segments and strip any leading/trailing slashes
+const postSlugStr = (
+	Array.isArray(postSlug) ? postSlug.join("/") : (postSlug ?? "")
+).replace(/^\/+|\/+$/g, "");
+
+// Guard against an empty slug (e.g. navigating to /w/:slug/posts/ directly)
+if (!postSlugStr) {
+	return Astro.redirect(`/w/${slug}/`);
+}
 
 const [workspace, entry] = await Promise.all([
 	getWorkspaceBySlug(workspaceSlug),
@@ -126,11 +135,23 @@ const jsonLd = {
           updated={updatedDate}
           tags={entry.tags}
           category={entry.category}
+          workspaceSlug={workspaceSlug}
         />
         {!entry.image && (
           <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>
         )}
       </div>
+
+      {entry.image && (
+        <div class="rounded-[var(--radius-large)] overflow-hidden w-full mb-5 onload-animation">
+          <ImageWrapper
+            src={entry.image}
+            alt={`Cover image for ${entry.title}`}
+            class="w-full max-h-[32vh] object-cover"
+            loading="eager"
+          />
+        </div>
+      )}
 
       <Markdown class="mb-6 markdown-content onload-animation">
         {isStudy && (

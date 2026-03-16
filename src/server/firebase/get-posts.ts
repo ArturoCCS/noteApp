@@ -133,21 +133,50 @@ function postDocId(workspaceId: string, slug: string) {
 /**
  * Nuevo: post por workspace + slug (para rutas públicas /w/:slug/posts/:postSlug)
  * y para admin si quieres acceder por slug dentro de su workspace.
+ *
+ * Normaliza el slug (quita barras al inicio/fin) y hace fallback por campo
+ * si el docId compuesto no existe (cubre posts antiguos o slugs con barras).
  */
 export async function getPostBySlug(workspaceId: string, slug: string) {
+	// Normalize: strip leading/trailing slashes so that a slug like "my-post/"
+	// (which may arrive from Astro rest params) resolves to the same docId as
+	// "my-post". DocIds follow the format `workspaceId__slug` (no slashes).
+	const normalizedSlug = slug.replace(/^\/+|\/+$/g, "");
+
 	try {
-		const id = postDocId(workspaceId, slug);
+		const id = postDocId(workspaceId, normalizedSlug);
 		const doc = await db.collection("posts").doc(id).get();
-		if (!doc.exists) return null;
+		if (doc.exists) {
+			const data = doc.data();
+			return {
+				id: doc.id,
+				...data,
+				published: data?.published?.toDate?.() ?? data?.published,
+				updated: data?.updated?.toDate?.() ?? data?.updated,
+			} as Post;
+		}
 
-		const data = doc.data();
+		// Fallback: query by workspaceId + slug fields (covers legacy doc IDs or
+		// posts whose docId doesn't follow the workspaceId__slug convention)
+		const snapshot = await db
+			.collection("posts")
+			.where("workspaceId", "==", workspaceId)
+			.where("slug", "==", normalizedSlug)
+			.limit(1)
+			.get();
 
-		return {
-			id: doc.id,
-			...data,
-			published: data?.published?.toDate?.() ?? data?.published,
-			updated: data?.updated?.toDate?.() ?? data?.updated,
-		} as Post;
+		if (!snapshot.empty) {
+			const fallbackDoc = snapshot.docs[0];
+			const data = fallbackDoc.data();
+			return {
+				id: fallbackDoc.id,
+				...data,
+				published: data?.published?.toDate?.() ?? data?.published,
+				updated: data?.updated?.toDate?.() ?? data?.updated,
+			} as Post;
+		}
+
+		return null;
 	} catch (error) {
 		console.error("Error al traer post por workspace+slug:", error);
 		return null;
