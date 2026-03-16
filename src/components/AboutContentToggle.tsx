@@ -3,9 +3,13 @@ import { useRef, useState } from "react";
 
 interface Props {
 	initialContent: string;
+	workspaceSlug?: string;
 }
 
-export default function AboutInlineEditor({ initialContent }: Props) {
+export default function AboutInlineEditor({
+	initialContent,
+	workspaceSlug,
+}: Props) {
 	const [isEditing, setIsEditing] = useState(false);
 	const [content, setContent] = useState(initialContent);
 	const getMarkdownRef = useRef<() => string>(() => "");
@@ -18,11 +22,20 @@ export default function AboutInlineEditor({ initialContent }: Props) {
 			return;
 		}
 
-		await fetch("/api/update-about/", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ content: newContent }),
-		});
+		if (workspaceSlug) {
+			// Save to the workspace document via the workspace update API
+			await fetch("/api/workspace/update/", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ pages: { about: newContent } }),
+			});
+		} else {
+			await fetch("/api/update-about/", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ content: newContent }),
+			});
+		}
 
 		setContent(newContent);
 		setIsEditing(false);

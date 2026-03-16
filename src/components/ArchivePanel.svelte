@@ -26,6 +26,7 @@ export interface Post {
 	}
 
 	export let sortedPosts: Post[] = [];
+	export let workspaceSlug: string = "";
 	
 	let groups: Group[] = [];
 
@@ -97,7 +98,7 @@ export interface Post {
 			</div>
 
 			{#each group.posts as post}
-				<a href={`/posts/${post.slug}/`} 
+				<a href={workspaceSlug ? `/w/${workspaceSlug}/posts/${post.slug}/` : `/posts/${post.slug}/`} 
 				   aria-label={post.title}
 				   class="group btn-plain !block h-10 w-full rounded-lg hover:text-[initial]">
 					<div class="flex flex-row justify-start items-center h-full">
