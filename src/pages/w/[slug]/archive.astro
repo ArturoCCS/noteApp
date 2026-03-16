@@ -1,0 +1,42 @@
+---
+export const prerender = false;
+
+import ArchivePanel from "@components/ArchivePanel.svelte";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { Icon } from "astro-icon/components";
+import { getSortedPosts } from "@/server/firebase/get-posts";
+import { getWorkspaceBySlug } from "@/server/firebase/get-workspace";
+
+const { slug } = Astro.params as { slug: string };
+
+const workspace = await getWorkspaceBySlug(slug);
+
+if (!workspace || !workspace.isPublic) {
+	return Astro.redirect("/404");
+}
+
+const allPosts = (await getSortedPosts(slug)).map((post) => ({
+	...post,
+	category: post.category === null ? undefined : post.category,
+}));
+---
+
+<MainGridLayout
+  title={`${i18n(I18nKey.archive)} · ${workspace.site.title}`}
+  description={workspace.site.subtitle}
+  lang={workspace.site.lang}
+  workspaceSlug={slug}
+>
+  <!-- Workspace badge -->
+  <div class="flex items-center gap-2 mb-4 px-1 onload-animation">
+    <a href={`/w/${slug}/`} class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--primary)]/10 border border-[var(--primary)]/20 text-sm text-[var(--primary)] font-medium hover:bg-[var(--primary)]/20 transition">
+      <Icon name="material-symbols:workspaces-outline" class="text-base" />
+      <span>@{slug}</span>
+    </a>
+    <span class="text-sm text-black/40 dark:text-white/40">· {i18n(I18nKey.archive)}</span>
+  </div>
+
+  <ArchivePanel client:load sortedPosts={allPosts} workspaceSlug={slug} />
+</MainGridLayout>

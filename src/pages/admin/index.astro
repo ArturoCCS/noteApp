@@ -38,8 +38,12 @@ const posts = await getSortedPosts(auth.workspaceSlug);
       ))}
     </div>
 
-    <div class="mt-6">
+    <div class="mt-6 flex gap-4">
       <a class="link text-[var(--primary)]" href="/admin/workspace/">Configurar entorno</a>
+      <span class="text-black/30 dark:text-white/30">·</span>
+      <a class="link text-[var(--primary)]" href="/admin/archive/">Archivo</a>
+      <span class="text-black/30 dark:text-white/30">·</span>
+      <a class="link text-[var(--primary)]" href={`/w/${auth.workspaceSlug}/`} target="_blank">Ver workspace público</a>
     </div>
   </div>
 </MainGridLayout>

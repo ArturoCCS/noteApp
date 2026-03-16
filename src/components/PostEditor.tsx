@@ -9,9 +9,10 @@ import { Editor } from "./Editor";
 
 interface Props {
 	post: Post;
+	workspaceSlug: string;
 }
 
-export default function PostEditor({ post }: Props) {
+export default function PostEditor({ post, workspaceSlug }: Props) {
 	const getMarkdownRef = useRef<() => string>(() => "");
 
 	const [title, setTitle] = useState(post.title ?? "");
@@ -252,7 +253,7 @@ export default function PostEditor({ post }: Props) {
 			<div className="flex justify-end gap-4 pt-6 pb-12">
 				<div className="flex flex-col md:flex-row justify-between mb-4 gap-4 overflow-hidden w-full onload-animation">
 					<a
-						href={`/posts/${post.slug}/`}
+						href={`/w/${workspaceSlug}/posts/${post.slug}/`}
 						className="w-full font-bold overflow-hidden active:scale-95"
 					>
 						<div className="btn-card rounded-2xl w-full h-[3.75rem] px-4 flex items-center justify-start gap-4">
@@ -262,7 +263,7 @@ export default function PostEditor({ post }: Props) {
 								icon={""}
 							/>
 							<div className="text-black/75 dark:text-white/75">
-								Volver al inicio
+								Ver post público
 							</div>
 						</div>
 					</a>

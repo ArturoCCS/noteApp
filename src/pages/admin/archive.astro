@@ -1,0 +1,27 @@
+---
+export const prerender = false;
+
+import ArchivePanel from "@components/ArchivePanel.svelte";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { requireAdmin } from "@/server/firebase/auth";
+import { getSortedPosts } from "@/server/firebase/get-posts";
+
+const auth = await requireAdmin(Astro.request);
+if (!auth.ok) return Astro.redirect("/admin/login/");
+if (!auth.workspaceSlug) throw new Error("Missing workspaceSlug claim");
+
+const allPosts = (await getSortedPosts(auth.workspaceSlug)).map((post) => ({
+	...post,
+	category: post.category === null ? undefined : post.category,
+}));
+---
+
+<MainGridLayout title="Archivo" description="Todos los posts del workspace">
+  <div class="card-base p-6">
+    <div class="flex justify-between items-center mb-5">
+      <h1 class="text-2xl font-bold">Archivo</h1>
+      <a class="link text-[var(--primary)] text-sm" href="/admin/">← Volver al panel</a>
+    </div>
+    <ArchivePanel client:load sortedPosts={allPosts} workspaceSlug={auth.workspaceSlug} />
+  </div>
+</MainGridLayout>
