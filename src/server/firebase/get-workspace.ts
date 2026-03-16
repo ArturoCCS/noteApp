@@ -8,6 +8,24 @@ import {
 import type { WorkspaceConfig } from "@/types/workspace";
 import { db } from "./admin";
 
+export async function getWorkspaceAbout(
+	workspaceSlug: string,
+): Promise<string> {
+	try {
+		const doc = await db
+			.collection("workspaces")
+			.doc(workspaceSlug)
+			.collection("pages")
+			.doc("about")
+			.get();
+		if (!doc.exists) return "";
+		return doc.data()?.content ?? "";
+	} catch (error) {
+		console.error("Error al cargar about:", error);
+		return "";
+	}
+}
+
 export async function getWorkspaceBySlug(
 	slug: string,
 ): Promise<WorkspaceConfig | null> {

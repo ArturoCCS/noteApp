@@ -152,7 +152,7 @@ export async function getCategoryList(
 		countMap[category] = (countMap[category] || 0) + 1;
 	});
 
-	const baseUrl = workspaceSlug ? `/w/${workspaceSlug}/archive` : "/archive";
+	const baseUrl = workspaceSlug ? "/admin/archive" : "/archive";
 
 	return Object.keys(countMap)
 		.sort((a, b) => a.localeCompare(b))
