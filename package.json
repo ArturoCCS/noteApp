@@ -52,7 +52,7 @@
     "markdown-it": "^14.1.0",
     "marked": "^17.0.1",
     "mdast-util-to-string": "^4.0.0",
-    "overlayscrollbars": "^2.12.0",
+    "overlayscrollbars": "^2.13.0",
     "photoswipe": "^5.4.4",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
